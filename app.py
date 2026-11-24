@@ -453,7 +453,8 @@ def generate_audio_worker(content, language, voice, speech_style, file_name):
     try:
         language_code = get_language_code(language)
         voice_id = get_voice_id(language_code, voice)
-        style_id = get_style_id(speech_style, language_code)
+        style_language = language_code if language_code in ("vi", "en") else "vi"
+        style_id = get_style_id(speech_style, style_language)
         file_path = create_audio(
             text=content,
             language=language_code,
