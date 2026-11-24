@@ -32,8 +32,10 @@ class EnglishVoiceCatalogTests(unittest.TestCase):
             self.assertEqual(get_kokoro_language_code(voice["id"]), expected)
 
     def test_invalid_voice_id_is_rejected(self):
-        with self.assertRaises(ValueError):
-            get_kokoro_language_code("unknown_voice")
+        for invalid_id in ("unknown_voice", "af_not_a_real_voice"):
+            with self.subTest(voice_id=invalid_id):
+                with self.assertRaises(ValueError):
+                    get_kokoro_language_code(invalid_id)
 
     def test_voice_profiles_match_the_catalog(self):
         profiles = get_voice_profiles("en")
