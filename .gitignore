@@ -3,5 +3,6 @@
 __pycache__/
 .env
 output/
-*.pyc/data/voice_evaluations.json
+*.pyc
+/data/voice_evaluations.json
 /data/voice_evaluations.json.tmp
