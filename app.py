@@ -226,6 +226,9 @@ filename_input.insert(0, "ban_ghi_moi")
 filename_input.pack(fill="x", ipady=10)
 label(settings_card, "File format: WAV", 8, C["muted"]).pack(anchor="w", pady=(7, 0))
 
+generate_button = action_button(settings_card, "▶   GENERATE AUDIO", generate_audio, primary=True)
+generate_button.pack(fill="x", pady=(16, 0))
+
 # Generate controls and status
 generate_area = tk.Frame(settings_card, bg=C["panel"])
 generate_area.pack(side="bottom", fill="x", pady=(18, 0))
@@ -423,8 +426,6 @@ def generate_audio():
         daemon=True,
     ).start()
 
-generate_button = action_button(settings_card, "▶   GENERATE AUDIO", generate_audio, primary=True)
-generate_button.pack(side="bottom", fill="x", pady=(12, 0))
 
 refresh_audio_list()
 
