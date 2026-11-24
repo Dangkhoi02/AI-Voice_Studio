@@ -13,11 +13,9 @@ class VoiceProfileManagerTests(unittest.TestCase):
         self.assertEqual(profiles.get_profile_review_summary()["total"], 20)
 
     def test_save_evaluation_persists_scores_and_notes(self):
-        original = profiles.PROFILE_PATH
         with tempfile.TemporaryDirectory() as directory:
-            temporary_file = Path(directory) / "voice_profiles.json"
-            temporary_file.write_text(original.read_text(encoding="utf-8"), encoding="utf-8")
-            with patch.object(profiles, "PROFILE_PATH", temporary_file):
+            temporary_file = Path(directory) / "voice_evaluations.json"
+            with patch.object(profiles, "EVALUATION_PATH", temporary_file):
                 result = profiles.save_voice_evaluation(
                     "diem_trinh", "vi",
                     {"distinctiveness": 4, "naturalness": 5, "rhythm": 3, "expressiveness": 2},
