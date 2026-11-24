@@ -157,14 +157,14 @@ def save_voice_evaluation(
     EVALUATION_PATH.parent.mkdir(parents=True, exist_ok=True)
     temporary_path = EVALUATION_PATH.with_suffix(".json.tmp")
     try:
-        with temporary_path.open("w", encoding="utf-8", newline="\\n") as file:
+        with temporary_path.open("w", encoding="utf-8", newline="\n") as file:
             json.dump(
                 {"schema_version": 1, "evaluations": saved},
                 file,
                 ensure_ascii=False,
                 indent=2,
             )
-            file.write("\\n")
+            file.write("\n")
         os.replace(temporary_path, EVALUATION_PATH)
     finally:
         if temporary_path.exists():
