@@ -6,6 +6,7 @@ from services.voice_manager import (
     get_voice_options,
 )
 from services.voice_profile_manager import get_voice_profiles
+from services.kokoro_english_service import get_kokoro_language_code
 
 
 class EnglishVoiceCatalogTests(unittest.TestCase):
@@ -25,10 +26,14 @@ class EnglishVoiceCatalogTests(unittest.TestCase):
                 voice["id"],
             )
 
-    def test_british_voices_use_b_pipeline_prefix(self):
+    def test_pipeline_code_matches_accent_family(self):
         for voice in LANGUAGES["en"]["voices"]:
-            if voice["id"].startswith("b"):
-                self.assertIn(voice["id"][:1], ("a", "b"))
+            expected = "b" if voice["id"].startswith("b") else "a"
+            self.assertEqual(get_kokoro_language_code(voice["id"]), expected)
+
+    def test_invalid_voice_id_is_rejected(self):
+        with self.assertRaises(ValueError):
+            get_kokoro_language_code("unknown_voice")
 
     def test_voice_profiles_match_the_catalog(self):
         profiles = get_voice_profiles("en")
