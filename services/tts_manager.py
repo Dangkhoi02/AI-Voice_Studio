@@ -4,6 +4,7 @@ import re
 
 from services.kokoro_service import generate_vietnamese_audio
 from services.kokoro_english_service import generate_english_audio
+from services.voice_manager import get_default_voice
 
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -68,10 +69,11 @@ def generate_audio(
     if auto_language:
         language = detect_language(text)
 
-    # Khi nhan dien ngon ngu tu dong, uu tien giong doc tuong ung
-    # va khong giu lai giong doc khong phu hop da chon truoc do.
+    # Resolve the default voice from the central voice catalog.
+    # Automatic language detection keeps the existing behavior: use that
+    # language's default voice rather than a voice from another language.
     if auto_language or voice in (None, "auto"):
-        voice = "diem_trinh" if language == "vi" else "af_heart"
+        voice = get_default_voice(language)
 
     save_path = create_unique_filename(file_name)
 
