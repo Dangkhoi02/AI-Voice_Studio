@@ -1,0 +1,411 @@
+{
+  "schema_version": 1,
+  "description": "Voice identity metadata. Unknown traits stay null until verified by listening or reliable model documentation.",
+  "profiles": [
+    {
+      "id": "diem_trinh",
+      "language": "vi",
+      "display_name": "Diễm Trinh",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "hung_thinh",
+      "language": "vi",
+      "display_name": "Hưng Thịnh",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "mai_linh",
+      "language": "vi",
+      "display_name": "Mai Linh",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "mai_loan",
+      "language": "vi",
+      "display_name": "Mai Loan",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "manh_dung",
+      "language": "vi",
+      "display_name": "Mạnh Dũng",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "my_yen",
+      "language": "vi",
+      "display_name": "Mỹ Yến",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "ngoc_huyen",
+      "language": "vi",
+      "display_name": "Ngọc Huyền",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "phat_tai",
+      "language": "vi",
+      "display_name": "Phát Tài",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "thanh_dat",
+      "language": "vi",
+      "display_name": "Thành Đạt",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "thuc_trinh",
+      "language": "vi",
+      "display_name": "Thục Trinh",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "tuan_ngoc",
+      "language": "vi",
+      "display_name": "Tuấn Ngọc",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "storyvert",
+      "language": "vi",
+      "display_name": "Storyvert",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "duc_an",
+      "language": "vi",
+      "display_name": "Đức An",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "duc_duy",
+      "language": "vi",
+      "display_name": "Đức Duy",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "af_heart",
+      "language": "en",
+      "display_name": "af_heart",
+      "identity": {
+        "gender": null,
+        "region": null,
+        "accent": null,
+        "timbre": null,
+        "pitch_range": null,
+        "notes": ""
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    }
+  ]
+}
