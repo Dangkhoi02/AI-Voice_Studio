@@ -34,7 +34,7 @@ pause_profiles = {
     "serious": (280, 120),
 }
 sentence_pause, clause_pause = pause_profiles.get(expression, pause_profiles["natural"])
-segments = [part.strip() for part in re.split(r"(?<=[,;:])\\s+|(?<=[.!?…])\\s+", re.sub(r"\\s+", " ", text.strip())) if part.strip()]
+segments = [part.strip() for part in re.split(r"(?<=[,;:])\s+|(?<=[.!?…])\s+", re.sub(r"\s+", " ", text.strip())) if part.strip()]
 pipeline = KPipeline(lang_code="a")
 parts = []
 
