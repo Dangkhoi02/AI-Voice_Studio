@@ -61,7 +61,7 @@ tk.Label(options_frame, text="Giong doc:", font=("Arial", 10, "bold")).grid(
 )
 voice_options = ttk.Combobox(
     options_frame,
-    values=["Diem Trinh", "af_heart"],
+    values=["Tu dong theo ngon ngu", "Diem Trinh", "af_heart"],
     state="readonly",
     width=24
 )
@@ -258,6 +258,7 @@ def generate_audio_worker(content, language, voice, file_name):
             "English": "en"
         }
         voice_map = {
+            "Tu dong theo ngon ngu": "auto",
             "Diem Trinh": "diem_trinh",
             "af_heart": "af_heart"
         }
