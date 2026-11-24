@@ -14,6 +14,7 @@ from services.voice_manager import (
     get_voice_options,
     get_voice_id,
 )
+from services.style_manager import get_speech_styles, get_style_id
 from services.audio_library import (
     OUTPUT_DIR,
     list_audio_files,
@@ -225,12 +226,25 @@ voice_options = ttk.Combobox(
 voice_options.current(0)
 voice_options.pack(fill="x", pady=(0, 7))
 
+label(settings_card, "SPEECH STYLE", 8, C["muted"], True).pack(anchor="w", pady=(10, 7))
+style_options = ttk.Combobox(
+    settings_card, values=[], state="readonly", style="Dark.TCombobox"
+)
+style_options.pack(fill="x", pady=(0, 7))
+
+
+def update_style_options(language_code):
+    styles = get_speech_styles(language_code if language_code in ("vi", "en") else "vi")
+    style_options["values"] = [item["label"] for item in styles]
+    style_options.current(0)
+
 
 def update_voice_options(event=None):
     language_code = get_language_code(language_options.get())
     options = get_voice_options(language_code)
     voice_options["values"] = options
     voice_options.current(0)
+    update_style_options(language_code)
 
 
 language_options.bind("<<ComboboxSelected>>", update_voice_options)
@@ -435,15 +449,16 @@ def on_error(error_message):
     generate_button.config(state="normal")
     messagebox.showerror("Unable to generate speech", error_message)
 
-def generate_audio_worker(content, language, voice, file_name):
+def generate_audio_worker(content, language, voice, speech_style, file_name):
     try:
         language_code = get_language_code(language)
         voice_id = get_voice_id(language_code, voice)
+        style_id = get_style_id(speech_style, language_code)
         file_path = create_audio(
             text=content,
             language=language_code,
             voice=voice_id,
-            speed=1.0,
+            style=style_id,
             file_name=file_name,
         )
         root.after(0, lambda: on_success(file_path))
@@ -455,20 +470,21 @@ def generate_audio():
     content = text_input.get("1.0", "end-1c").strip()
     language = language_options.get()
     voice = voice_options.get()
+    speech_style = style_options.get()
     file_name = filename_input.get().strip() or "ban_ghi_moi"
     if not content:
         update_status("Please enter some text first.", C["red"])
         text_input.focus_set()
         return
-    if not language or not voice:
-        update_status("Choose a language and voice.", C["red"])
+    if not language or not voice or not speech_style:
+        update_status("Choose a language, voice and speech style.", C["red"])
         return
     generate_button.config(state="disabled")
     progress_bar.start(12)
     update_status("Generating your voice...", C["blue"])
     threading.Thread(
         target=generate_audio_worker,
-        args=(content, language, voice, file_name),
+        args=(content, language, voice, speech_style, file_name),
         daemon=True,
     ).start()
 
