@@ -5,6 +5,7 @@ import re
 from services.kokoro_service import generate_vietnamese_audio
 from services.kokoro_english_service import generate_english_audio
 from services.voice_manager import get_default_voice
+from services.style_manager import get_style_speed, get_speech_style
 
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -59,7 +60,8 @@ def generate_audio(
     text,
     language="auto",
     voice=None,
-    speed=1.0,
+    speed=None,
+    style="conversation",
     file_name="audio"
 ):
     if not text or not text.strip():
@@ -75,15 +77,19 @@ def generate_audio(
     if auto_language or voice in (None, "auto"):
         voice = get_default_voice(language)
 
-    save_path = create_unique_filename(file_name)
+    style_config = get_speech_style(style, language)
+    effective_speed = (
+        get_style_speed(style, language) if speed is None else float(speed)
+    )
 
+    save_path = create_unique_filename(file_name)
     output_path = str(save_path.relative_to(PROJECT_DIR))
 
     if language == "vi":
         return generate_vietnamese_audio(
             text=text,
             voice=voice or "diem_trinh",
-            speed=speed,
+            speed=effective_speed,
             output_path=output_path
         )
 
