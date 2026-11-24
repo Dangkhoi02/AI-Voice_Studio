@@ -7,6 +7,13 @@ from pathlib import Path
 import pygame
 
 from services.tts_manager import generate_audio as create_audio
+from services.voice_manager import (
+    AUTO_VOICE_LABEL,
+    get_language_options,
+    get_language_code,
+    get_voice_options,
+    get_voice_id,
+)
 from services.audio_library import (
     OUTPUT_DIR,
     list_audio_files,
@@ -204,7 +211,7 @@ label(settings_card, "Configure your output", 14, C["text"], True).pack(anchor="
 
 label(settings_card, "LANGUAGE", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
 language_options = ttk.Combobox(
-    settings_card, values=["Tự động nhận diện", "Tiếng Việt", "English"],
+    settings_card, values=get_language_options(),
     state="readonly", style="Dark.TCombobox"
 )
 language_options.current(0)
@@ -212,11 +219,22 @@ language_options.pack(fill="x", pady=(0, 16))
 
 label(settings_card, "VOICE", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
 voice_options = ttk.Combobox(
-    settings_card, values=["Tự động theo ngôn ngữ", "Diễm Trinh", "af_heart"],
+    settings_card, values=[AUTO_VOICE_LABEL],
     state="readonly", style="Dark.TCombobox"
 )
 voice_options.current(0)
 voice_options.pack(fill="x", pady=(0, 7))
+
+
+def update_voice_options(event=None):
+    language_code = get_language_code(language_options.get())
+    options = get_voice_options(language_code)
+    voice_options["values"] = options
+    voice_options.current(0)
+
+
+language_options.bind("<<ComboboxSelected>>", update_voice_options)
+update_voice_options()
 label(settings_card, "Auto voice selects a matching voice for the detected language.", 8, C["muted"], wraplength=245, justify="left").pack(anchor="w", pady=(0, 17))
 
 tk.Frame(settings_card, bg=C["border"], height=1).pack(fill="x", pady=(0, 15))
@@ -419,20 +437,12 @@ def on_error(error_message):
 
 def generate_audio_worker(content, language, voice, file_name):
     try:
-        language_map = {
-            "Tự động nhận diện": "auto",
-            "Tiếng Việt": "vi",
-            "English": "en",
-        }
-        voice_map = {
-            "Tự động theo ngôn ngữ": "auto",
-            "Diễm Trinh": "diem_trinh",
-            "af_heart": "af_heart",
-        }
+        language_code = get_language_code(language)
+        voice_id = get_voice_id(language_code, voice)
         file_path = create_audio(
             text=content,
-            language=language_map[language],
-            voice=voice_map[voice],
+            language=language_code,
+            voice=voice_id,
             speed=1.0,
             file_name=file_name,
         )
