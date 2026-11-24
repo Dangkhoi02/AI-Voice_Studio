@@ -8,15 +8,17 @@ WAV files and report.csv are written to output/voice_audition_english/.
 from pathlib import Path
 import csv
 import traceback
+import sys
+
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+if str(PROJECT_DIR) not in sys.path:
+    sys.path.insert(0, str(PROJECT_DIR))
 
 import numpy as np
 import soundfile as sf
 from kokoro import KPipeline
 
 from services.voice_manager import LANGUAGES
-
-
-PROJECT_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = PROJECT_DIR / "output" / "voice_audition_english"
 TEST_TEXT = (
     "Hello, and welcome to AI Voice Studio. "
