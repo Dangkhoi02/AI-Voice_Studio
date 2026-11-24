@@ -4,6 +4,8 @@ Unknown identity traits and capabilities remain unset until verified.
 """
 import json
 from copy import deepcopy
+from datetime import datetime, timezone
+import os
 from pathlib import Path
 
 from services.voice_manager import LANGUAGES
@@ -83,3 +85,62 @@ def get_profile_review_summary(language_code=None):
         "reviewed": reviewed,
         "pending": len(profiles) - reviewed,
     }
+
+
+def save_voice_evaluation(
+    voice_id,
+    language_code,
+    ratings,
+    status="reviewed",
+    notes="",
+):
+    """Persist a listener's evaluation without changing unverified identity traits."""
+    if status not in VALID_EVALUATION_STATUSES:
+        raise ValueError(f"Invalid evaluation status: {status}")
+
+    allowed_ratings = {"distinctiveness", "naturalness", "rhythm", "expressiveness"}
+    if not isinstance(ratings, dict) or set(ratings) - allowed_ratings:
+        raise ValueError("Unsupported evaluation field.")
+
+    normalized_ratings = {}
+    for field in allowed_ratings:
+        value = ratings.get(field)
+        if value is not None:
+            if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 5:
+                raise ValueError(f"{field} must be an integer from 1 to 5 or None.")
+        normalized_ratings[field] = value
+
+    if not isinstance(notes, str):
+        raise ValueError("Evaluation notes must be text.")
+
+    data = _load_profiles()
+    target = next(
+        (
+            profile for profile in data["profiles"]
+            if profile["id"] == voice_id and profile["language"] == language_code
+        ),
+        None,
+    )
+    if target is None:
+        raise ValueError(f"Voice Profile not found: {language_code}/{voice_id}")
+
+    evaluation = target.setdefault("evaluation", {})
+    evaluation.update(normalized_ratings)
+    evaluation["status"] = status
+    evaluation["notes"] = notes.strip()
+    evaluation["reviewed_at"] = (
+        datetime.now(timezone.utc).isoformat(timespec="seconds")
+        if status == "reviewed"
+        else None
+    )
+
+    temporary_path = PROFILE_PATH.with_suffix(".json.tmp")
+    try:
+        with temporary_path.open("w", encoding="utf-8", newline="\\n") as file:
+            json.dump(data, file, ensure_ascii=False, indent=2)
+            file.write("\\n")
+        os.replace(temporary_path, PROFILE_PATH)
+    finally:
+        if temporary_path.exists():
+            temporary_path.unlink()
+    return deepcopy(target)
