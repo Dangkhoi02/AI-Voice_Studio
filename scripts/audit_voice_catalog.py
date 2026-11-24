@@ -8,6 +8,12 @@ The script writes one WAV per voice under output/voice_audition/.
 from pathlib import Path
 import csv
 import traceback
+import sys
+
+# Add the project root so imports work when this file is run from scripts/.
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+if str(PROJECT_DIR) not in sys.path:
+    sys.path.insert(0, str(PROJECT_DIR))
 
 import soundfile as sf
 
