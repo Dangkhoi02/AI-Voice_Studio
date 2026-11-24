@@ -13,6 +13,7 @@ from services.voice_manager import LANGUAGES
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 PROFILE_PATH = PROJECT_DIR / "configs" / "voice_profiles.json"
+EVALUATION_PATH = PROJECT_DIR / "data" / "voice_evaluations.json"
 VALID_EVALUATION_STATUSES = {"pending", "reviewed", "needs_retest"}
 
 
@@ -52,9 +53,25 @@ def _load_profiles():
     return data
 
 
+def _load_saved_evaluations():
+    """Load user-specific reviews stored outside the versioned voice catalog."""
+    if not EVALUATION_PATH.exists():
+        return {}
+    with EVALUATION_PATH.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+    if data.get("schema_version") != 1 or not isinstance(data.get("evaluations"), dict):
+        raise ValueError("Invalid local voice-evaluation data.")
+    return data["evaluations"]
+
+
 def get_voice_profiles(language_code=None):
-    """Return profiles in catalog order, optionally filtered by language."""
+    """Return catalog profiles with local evaluations overlaid."""
     profiles = _load_profiles()["profiles"]
+    saved = _load_saved_evaluations()
+    for profile in profiles:
+        key = f"{profile['language']}:{profile['id']}"
+        if key in saved:
+            profile["evaluation"].update(saved[key])
     if language_code is not None:
         profiles = [
             profile for profile in profiles
@@ -94,7 +111,7 @@ def save_voice_evaluation(
     status="reviewed",
     notes="",
 ):
-    """Persist a listener's evaluation without changing unverified identity traits."""
+    """Persist a listener's evaluation in a local, git-ignored data file."""
     if status not in VALID_EVALUATION_STATUSES:
         raise ValueError(f"Invalid evaluation status: {status}")
 
@@ -113,10 +130,10 @@ def save_voice_evaluation(
     if not isinstance(notes, str):
         raise ValueError("Evaluation notes must be text.")
 
-    data = _load_profiles()
+    known_profiles = _load_profiles()["profiles"]
     target = next(
         (
-            profile for profile in data["profiles"]
+            profile for profile in known_profiles
             if profile["id"] == voice_id and profile["language"] == language_code
         ),
         None,
@@ -124,23 +141,34 @@ def save_voice_evaluation(
     if target is None:
         raise ValueError(f"Voice Profile not found: {language_code}/{voice_id}")
 
-    evaluation = target.setdefault("evaluation", {})
-    evaluation.update(normalized_ratings)
-    evaluation["status"] = status
-    evaluation["notes"] = notes.strip()
-    evaluation["reviewed_at"] = (
-        datetime.now(timezone.utc).isoformat(timespec="seconds")
-        if status == "reviewed"
-        else None
-    )
+    evaluation = {
+        **normalized_ratings,
+        "status": status,
+        "notes": notes.strip(),
+        "reviewed_at": (
+            datetime.now(timezone.utc).isoformat(timespec="seconds")
+            if status == "reviewed"
+            else None
+        ),
+    }
 
-    temporary_path = PROFILE_PATH.with_suffix(".json.tmp")
+    saved = _load_saved_evaluations()
+    saved[f"{language_code}:{voice_id}"] = evaluation
+    EVALUATION_PATH.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = EVALUATION_PATH.with_suffix(".json.tmp")
     try:
-        with temporary_path.open("w", encoding="utf-8", newline="\n") as file:
-            json.dump(data, file, ensure_ascii=False, indent=2)
-            file.write("\n")
-        os.replace(temporary_path, PROFILE_PATH)
+        with temporary_path.open("w", encoding="utf-8", newline="\\n") as file:
+            json.dump(
+                {"schema_version": 1, "evaluations": saved},
+                file,
+                ensure_ascii=False,
+                indent=2,
+            )
+            file.write("\\n")
+        os.replace(temporary_path, EVALUATION_PATH)
     finally:
         if temporary_path.exists():
             temporary_path.unlink()
+
+    target["evaluation"].update(evaluation)
     return deepcopy(target)
