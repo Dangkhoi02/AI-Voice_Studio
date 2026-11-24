@@ -67,6 +67,10 @@ def generate_audio(
     if language == "auto":
         language = detect_language(text)
 
+    # Chon giong doc tuong ung neu nguoi dung bat che do tu dong.
+    if voice in (None, "auto"):
+        voice = "diem_trinh" if language == "vi" else "af_heart"
+
     save_path = create_unique_filename(file_name)
 
     output_path = str(save_path.relative_to(PROJECT_DIR))
