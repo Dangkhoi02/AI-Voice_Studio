@@ -19,6 +19,9 @@ from services.voice_manager import (
 )
 from services.style_manager import get_speech_styles, get_style_id
 from services.speech_analyzer import get_expression_options, get_expression_id
+from services.voice_profile_manager import (
+    get_voice_profiles, get_profile_review_summary, save_voice_evaluation,
+)
 from services.audio_library import (
     OUTPUT_DIR,
     list_audio_files,
@@ -137,6 +140,7 @@ nav_labels = {}
 for key, symbol, name in [
     ("studio", "▣", "Voice Studio"),
     ("library", "♫", "Audio Library"),
+    ("profiles", "◎", "Voice Profiles"),
 ]:
     row = tk.Frame(sidebar, bg=C["sidebar"], padx=16, pady=12, cursor="hand2")
     row.pack(fill="x", padx=12, pady=3)
@@ -336,6 +340,204 @@ status.pack(anchor="w", pady=(0, 9))
 progress_bar = ttk.Progressbar(generate_area, mode="indeterminate", style="Dark.Horizontal.TProgressbar")
 progress_bar.pack(fill="x", pady=(0, 10))
 
+# Voice Profiles page
+profiles_card = card(content, padx=18, pady=16)
+profiles_card.grid(row=0, column=0, columnspan=2, sticky="nsew")
+profiles_card.grid_remove()
+profiles_header = tk.Frame(profiles_card, bg=C["panel"])
+profiles_header.pack(fill="x", pady=(0, 14))
+label(profiles_header, "Voice Profiles", 17, C["text"], True).pack(side="left")
+profile_summary_label = label(profiles_header, "", 9, C["muted"])
+profile_summary_label.pack(side="right")
+
+profiles_toolbar = tk.Frame(profiles_card, bg=C["panel"])
+profiles_toolbar.pack(fill="x", pady=(0, 12))
+label(profiles_toolbar, "LANGUAGE", 8, C["muted"], True).pack(side="left", padx=(0, 8))
+profile_language_filter = ttk.Combobox(
+    profiles_toolbar, values=["Tất cả", "Tiếng Việt", "English"],
+    state="readonly", style="Dark.TCombobox", width=16
+)
+profile_language_filter.current(0)
+profile_language_filter.pack(side="left")
+profile_body = tk.Frame(profiles_card, bg=C["panel"])
+profile_body.pack(fill="both", expand=True)
+profile_body.columnconfigure(0, weight=1)
+profile_body.columnconfigure(1, weight=2)
+profile_body.rowconfigure(0, weight=1)
+
+profile_list_frame = tk.Frame(profile_body, bg=C["input"], highlightbackground=C["border"], highlightthickness=1)
+profile_list_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 14))
+profile_list_scroll = ttk.Scrollbar(profile_list_frame, orient="vertical")
+profile_listbox = tk.Listbox(
+    profile_list_frame, font=(FONT, 9), activestyle="none", relief="flat", bd=0,
+    bg=C["input"], fg=C["text"], selectbackground="#294A7B",
+    yscrollcommand=profile_list_scroll.set
+)
+profile_list_scroll.config(command=profile_listbox.yview)
+profile_list_scroll.pack(side="right", fill="y")
+profile_listbox.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+
+profile_detail = tk.Frame(profile_body, bg=C["panel"])
+profile_detail.grid(row=0, column=1, sticky="nsew")
+profile_detail.columnconfigure(1, weight=1)
+profile_name_label = label(profile_detail, "Chọn một giọng đọc", 15, C["text"], True)
+profile_name_label.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 5))
+profile_identity_label = label(profile_detail, "", 9, C["muted"], wraplength=540, justify="left")
+profile_identity_label.grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 14))
+label(profile_detail, "ĐÁNH GIÁ GIỌNG ĐỌC (1–5)", 8, C["muted"], True).grid(
+    row=2, column=0, columnspan=2, sticky="w", pady=(0, 8)
+)
+profile_rating_entries = {}
+for row_index, (field, caption_text) in enumerate([
+    ("distinctiveness", "Độ khác biệt"),
+    ("naturalness", "Độ tự nhiên"),
+    ("rhythm", "Nhịp điệu"),
+    ("expressiveness", "Biểu cảm"),
+], start=3):
+    label(profile_detail, caption_text, 9, C["muted"]).grid(
+        row=row_index, column=0, sticky="w", pady=4
+    )
+    entry = tk.Entry(
+        profile_detail, width=8, font=(FONT, 9), relief="flat",
+        bg=C["input"], fg=C["text"], insertbackground=C["blue"],
+        highlightthickness=1, highlightbackground=C["border"]
+    )
+    entry.grid(row=row_index, column=1, sticky="w", pady=4, ipady=4)
+    profile_rating_entries[field] = entry
+
+status_row = 7
+label(profile_detail, "TRẠNG THÁI", 8, C["muted"], True).grid(
+    row=status_row, column=0, sticky="w", pady=(12, 6)
+)
+profile_status = ttk.Combobox(
+    profile_detail, values=["pending", "reviewed", "needs_retest"],
+    state="readonly", style="Dark.TCombobox", width=18
+)
+profile_status.grid(row=status_row, column=1, sticky="w", pady=(12, 6))
+label(profile_detail, "GHI CHÚ ĐÁNH GIÁ", 8, C["muted"], True).grid(
+    row=8, column=0, columnspan=2, sticky="w", pady=(12, 6)
+)
+profile_notes = tk.Text(
+    profile_detail, height=5, wrap="word", font=(FONT, 9),
+    bg=C["input"], fg=C["text"], insertbackground=C["blue"],
+    relief="flat", bd=0, padx=9, pady=8
+)
+profile_notes.grid(row=9, column=0, columnspan=2, sticky="ew")
+profile_action_row = tk.Frame(profile_detail, bg=C["panel"])
+profile_action_row.grid(row=10, column=0, columnspan=2, sticky="ew", pady=(12, 0))
+profile_save_button = action_button(profile_action_row, "Save evaluation", lambda: save_selected_profile(), primary=True, compact=True)
+profile_save_button.pack(side="left", padx=(0, 8))
+profile_use_button = action_button(profile_action_row, "Use in Studio", lambda: use_selected_profile(), compact=True)
+profile_use_button.pack(side="left")
+
+profile_records = []
+
+def selected_profile():
+    selection = profile_listbox.curselection()
+    if not selection:
+        return None
+    index = selection[0]
+    if index >= len(profile_records):
+        return None
+    return profile_records[index]
+
+def refresh_profile_list(select_id=None):
+    global profile_records
+    language_label = profile_language_filter.get()
+    language_code = {"Tiếng Việt": "vi", "English": "en"}.get(language_label)
+    profile_records = get_voice_profiles(language_code)
+    profile_listbox.delete(0, tk.END)
+    for profile in profile_records:
+        language_tag = "VI" if profile["language"] == "vi" else "EN"
+        evaluation = profile["evaluation"]
+        marker = "✓" if evaluation["status"] == "reviewed" else "○"
+        profile_listbox.insert(tk.END, f"{marker} [{language_tag}] {profile['display_name']}")
+    summary = get_profile_review_summary(language_code)
+    profile_summary_label.config(
+        text=f"{summary['reviewed']}/{summary['total']} đã đánh giá · {summary['pending']} còn lại"
+    )
+    if profile_records:
+        target_index = next(
+            (i for i, item in enumerate(profile_records) if item["id"] == select_id),
+            0
+        )
+        profile_listbox.selection_set(target_index)
+        profile_listbox.activate(target_index)
+        show_selected_profile()
+    else:
+        profile_name_label.config(text="Không có hồ sơ giọng đọc")
+        profile_identity_label.config(text="")
+
+def show_selected_profile(event=None):
+    profile = selected_profile()
+    if profile is None:
+        return
+    identity = profile.get("identity", {})
+    evaluation = profile.get("evaluation", {})
+    language_name = "Tiếng Việt" if profile["language"] == "vi" else "English"
+    profile_name_label.config(text=profile["display_name"])
+    identity_parts = [
+        f"Ngôn ngữ: {language_name}",
+        f"Giới tính: {identity.get('gender') or 'Chưa xác minh'}",
+        f"Khu vực: {identity.get('region') or 'Chưa xác minh'}",
+        f"Accent: {identity.get('accent') or 'Chưa xác minh'}",
+        f"Chất giọng: {identity.get('timbre') or 'Chưa đánh giá'}",
+    ]
+    profile_identity_label.config(text="   •   ".join(identity_parts))
+    for field, entry in profile_rating_entries.items():
+        entry.delete(0, tk.END)
+        value = evaluation.get(field)
+        if value is not None:
+            entry.insert(0, str(value))
+    profile_status.set(evaluation.get("status", "pending"))
+    profile_notes.delete("1.0", tk.END)
+    profile_notes.insert("1.0", evaluation.get("notes") or "")
+
+def save_selected_profile():
+    profile = selected_profile()
+    if profile is None:
+        return
+    ratings = {}
+    try:
+        for field, entry in profile_rating_entries.items():
+            raw_value = entry.get().strip()
+            if not raw_value:
+                ratings[field] = None
+                continue
+            value = int(raw_value)
+            if not 1 <= value <= 5:
+                raise ValueError("Điểm đánh giá phải nằm trong khoảng 1 đến 5.")
+            ratings[field] = value
+        save_voice_evaluation(
+            voice_id=profile["id"],
+            language_code=profile["language"],
+            ratings=ratings,
+            status=profile_status.get(),
+            notes=profile_notes.get("1.0", "end-1c").strip(),
+        )
+        refresh_profile_list(profile["id"])
+        messagebox.showinfo("Voice Profiles", "Đã lưu đánh giá giọng đọc.")
+    except (ValueError, OSError) as error:
+        messagebox.showerror("Không thể lưu đánh giá", str(error))
+
+def use_selected_profile():
+    profile = selected_profile()
+    if profile is None:
+        return
+    language_options.set("Tiếng Việt" if profile["language"] == "vi" else "English")
+    update_voice_options()
+    voice_label = next(
+        (item["label"] for item in __import__("services.voice_manager", fromlist=["LANGUAGES"]).LANGUAGES[profile["language"]]["voices"] if item["id"] == profile["id"]),
+        None
+    )
+    if voice_label:
+        voice_options.set(voice_label)
+    show_page("studio")
+
+profile_listbox.bind("<<ListboxSelect>>", show_selected_profile)
+profile_language_filter.bind("<<ComboboxSelected>>", lambda event: refresh_profile_list())
+refresh_profile_list()
+
 # Library card
 library_card = card(content, padx=18, pady=14)
 library_card.grid(row=1, column=0, columnspan=2, sticky="nsew")
@@ -361,14 +563,22 @@ audio_scrollbar.pack(side="right", fill="y")
 audio_list.pack(side="left", fill="both", expand=True, padx=7, pady=5)
 
 def show_page(page):
+    profiles_card.grid_remove()
     if page == "library":
         editor_card.grid_remove()
         settings_card.grid_remove()
         library_card.grid_configure(row=0, column=0, columnspan=2, sticky="nsew")
+    elif page == "profiles":
+        editor_card.grid_remove()
+        settings_card.grid_remove()
+        library_card.grid_remove()
+        profiles_card.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        refresh_profile_list()
     else:
         library_card.grid_configure(row=1, column=0, columnspan=2, sticky="nsew")
         editor_card.grid()
         settings_card.grid()
+        library_card.grid()
 
     for key, row in nav_rows.items():
         active = key == page
