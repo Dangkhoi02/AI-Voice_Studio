@@ -226,7 +226,7 @@ filename_input.insert(0, "ban_ghi_moi")
 filename_input.pack(fill="x", ipady=10)
 label(settings_card, "File format: WAV", 8, C["muted"]).pack(anchor="w", pady=(7, 0))
 
-generate_button = action_button(settings_card, "▶   GENERATE AUDIO", generate_audio, primary=True)
+generate_button = action_button(settings_card, "▶   GENERATE AUDIO", lambda: None, primary=True)
 generate_button.pack(fill="x", pady=(16, 0))
 
 # Generate controls and status
@@ -426,6 +426,8 @@ def generate_audio():
         daemon=True,
     ).start()
 
+
+generate_button.config(command=generate_audio)
 
 refresh_audio_list()
 
