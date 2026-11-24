@@ -204,43 +204,81 @@ def update_char_count(event=None):
     char_count.config(text=f"{count:,} characters")
 text_input.bind("<KeyRelease>", update_char_count)
 
-# Voice settings panel
-settings_card = card(content, width=286, padx=17, pady=16)
+# Voice settings panel with its own vertical scrolling area.
+settings_card = card(content, width=286)
 settings_card.grid(row=0, column=1, sticky="nsew", pady=(0, 14))
 settings_card.grid_propagate(False)
-label(settings_card, "VOICE SETTINGS", 9, C["muted"], True).pack(anchor="w")
-label(settings_card, "Configure your output", 14, C["text"], True).pack(anchor="w", pady=(14, 17))
 
-label(settings_card, "LANGUAGE", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
+settings_canvas = tk.Canvas(
+    settings_body, bg=C["panel"], highlightthickness=0, bd=0
+)
+settings_scrollbar = ttk.Scrollbar(
+    settings_body, orient="vertical", command=settings_canvas.yview,
+    style="Dark.Vertical.TScrollbar"
+)
+settings_canvas.configure(yscrollcommand=settings_scrollbar.set)
+settings_scrollbar.pack(side="right", fill="y")
+settings_canvas.pack(side="left", fill="both", expand=True)
+
+settings_body = tk.Frame(settings_canvas, bg=C["panel"], padx=17, pady=16)
+settings_window = settings_canvas.create_window(
+    (0, 0), window=settings_body, anchor="nw"
+)
+
+def update_settings_scroll_region(event=None):
+    settings_canvas.configure(scrollregion=settings_canvas.bbox("all"))
+    settings_canvas.itemconfigure(settings_window, width=settings_canvas.winfo_width())
+
+settings_body.bind("<Configure>", update_settings_scroll_region)
+settings_canvas.bind("<Configure>", update_settings_scroll_region)
+
+def scroll_settings(event):
+    if settings_canvas.winfo_exists():
+        settings_canvas.yview_scroll(int(-event.delta / 120), "units")
+
+def bind_settings_wheel(event):
+    settings_canvas.bind_all("<MouseWheel>", scroll_settings)
+
+def unbind_settings_wheel(event):
+    settings_canvas.unbind_all("<MouseWheel>")
+
+settings_canvas.bind("<Enter>", bind_settings_wheel)
+settings_canvas.bind("<Leave>", unbind_settings_wheel)
+settings_body.bind("<Enter>", bind_settings_wheel)
+settings_body.bind("<Leave>", unbind_settings_wheel)
+label(settings_body, "VOICE SETTINGS", 9, C["muted"], True).pack(anchor="w")
+label(settings_body, "Configure your output", 14, C["text"], True).pack(anchor="w", pady=(14, 17))
+
+label(settings_body, "LANGUAGE", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
 language_options = ttk.Combobox(
-    settings_card, values=get_language_options(),
+    settings_body, values=get_language_options(),
     state="readonly", style="Dark.TCombobox"
 )
 language_options.current(0)
 language_options.pack(fill="x", pady=(0, 16))
 
-label(settings_card, "VOICE", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
+label(settings_body, "VOICE", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
 voice_options = ttk.Combobox(
-    settings_card, values=[AUTO_VOICE_LABEL],
+    settings_body, values=[AUTO_VOICE_LABEL],
     state="readonly", style="Dark.TCombobox"
 )
 voice_options.current(0)
 voice_options.pack(fill="x", pady=(0, 7))
 
-label(settings_card, "SPEECH STYLE", 8, C["muted"], True).pack(anchor="w", pady=(10, 7))
+label(settings_body, "SPEECH STYLE", 8, C["muted"], True).pack(anchor="w", pady=(10, 7))
 style_options = ttk.Combobox(
-    settings_card, values=[], state="readonly", style="Dark.TCombobox"
+    settings_body, values=[], state="readonly", style="Dark.TCombobox"
 )
 style_options.pack(fill="x", pady=(0, 7))
 
-label(settings_card, "EXPRESSION", 8, C["muted"], True).pack(anchor="w", pady=(10, 7))
+label(settings_body, "EXPRESSION", 8, C["muted"], True).pack(anchor="w", pady=(10, 7))
 expression_options = ttk.Combobox(
-    settings_card, values=get_expression_options(), state="readonly", style="Dark.TCombobox"
+    settings_body, values=get_expression_options(), state="readonly", style="Dark.TCombobox"
 )
 expression_options.current(0)
 expression_options.pack(fill="x", pady=(0, 7))
 label(
-    settings_card,
+    settings_body,
     "Điều chỉnh nhịp nghỉ theo dấu câu; chưa thay đổi cảm xúc hoặc cao độ của mô hình.",
     8, C["muted"], wraplength=245, justify="left"
 ).pack(anchor="w", pady=(0, 8))
@@ -262,25 +300,25 @@ def update_voice_options(event=None):
 
 language_options.bind("<<ComboboxSelected>>", update_voice_options)
 update_voice_options()
-label(settings_card, "Auto voice selects a matching voice for the detected language.", 8, C["muted"], wraplength=245, justify="left").pack(anchor="w", pady=(0, 17))
+label(settings_body, "Auto voice selects a matching voice for the detected language.", 8, C["muted"], wraplength=245, justify="left").pack(anchor="w", pady=(0, 17))
 
-tk.Frame(settings_card, bg=C["border"], height=1).pack(fill="x", pady=(0, 15))
-label(settings_card, "OUTPUT FILE NAME", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
+tk.Frame(settings_body, bg=C["border"], height=1).pack(fill="x", pady=(0, 15))
+label(settings_body, "OUTPUT FILE NAME", 8, C["muted"], True).pack(anchor="w", pady=(0, 7))
 filename_input = tk.Entry(
-    settings_card, font=(FONT, 10), relief="flat", bd=0,
+    settings_body, font=(FONT, 10), relief="flat", bd=0,
     bg=C["input"], fg=C["text"], insertbackground=C["blue"],
     highlightthickness=1, highlightbackground=C["border"],
     highlightcolor=C["blue"]
 )
 filename_input.insert(0, "ban_ghi_moi")
 filename_input.pack(fill="x", ipady=10)
-label(settings_card, "File format: WAV", 8, C["muted"]).pack(anchor="w", pady=(7, 0))
+label(settings_body, "File format: WAV", 8, C["muted"]).pack(anchor="w", pady=(7, 0))
 
-generate_button = action_button(settings_card, "▶   GENERATE AUDIO", lambda: None, primary=True)
+generate_button = action_button(settings_body, "▶   GENERATE AUDIO", lambda: None, primary=True)
 generate_button.pack(fill="x", pady=(16, 0))
 
 # Generate controls and status
-generate_area = tk.Frame(settings_card, bg=C["panel"])
+generate_area = tk.Frame(settings_body, bg=C["panel"])
 generate_area.pack(side="bottom", fill="x", pady=(18, 0))
 status = label(generate_area, "Ready to generate", 8, C["muted"], wraplength=245, justify="left")
 status.pack(anchor="w", pady=(0, 9))
