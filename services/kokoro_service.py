@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import soundfile as sf
@@ -7,18 +6,21 @@ from kokoro_vietnamese import KokoroVietnamese, SAMPLE_RATE
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 
-# Lưu model để không phải khởi tạo lại mỗi lần tạo âm thanh
 _tts = None
+_tts_voice = None
 
 
 def get_tts(voice="diem_trinh"):
-    global _tts
+    global _tts, _tts_voice
 
-    if _tts is None:
+    requested_voice = voice or "diem_trinh"
+
+    if _tts is None or _tts_voice != requested_voice:
         _tts = KokoroVietnamese(
-            voice=voice,
+            voice=requested_voice,
             device="cpu"
         )
+        _tts_voice = requested_voice
 
     return _tts
 
@@ -29,8 +31,8 @@ def generate_vietnamese_audio(
     speed=1.0,
     output_path="output/audio_vi.wav"
 ):
-    if not text.strip():
-        raise ValueError("Vui lòng nhập nội dung văn bản.")
+    if not text or not text.strip():
+        raise ValueError("Vui long nhap noi dung van ban.")
 
     tts = get_tts(voice)
 
