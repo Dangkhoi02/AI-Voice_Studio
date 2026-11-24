@@ -210,7 +210,7 @@ settings_card.grid(row=0, column=1, sticky="nsew", pady=(0, 14))
 settings_card.grid_propagate(False)
 
 settings_canvas = tk.Canvas(
-    settings_body, bg=C["panel"], highlightthickness=0, bd=0
+    settings_card, bg=C["panel"], highlightthickness=0, bd=0
 )
 settings_scrollbar = ttk.Scrollbar(
     settings_body, orient="vertical", command=settings_canvas.yview,
