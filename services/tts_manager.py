@@ -97,7 +97,7 @@ def generate_audio(
         return generate_english_audio(
             text=text,
             voice=voice or "af_heart",
-            speed=speed,
+            speed=effective_speed,
             output_path=output_path
         )
 
