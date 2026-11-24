@@ -383,14 +383,14 @@
     {
       "id": "af_heart",
       "language": "en",
-      "display_name": "af_heart",
+      "display_name": "American Female - Heart",
       "identity": {
-        "gender": null,
-        "region": null,
-        "accent": null,
+        "gender": "female",
+        "region": "United States",
+        "accent": "American English",
         "timbre": null,
         "pitch_range": null,
-        "notes": ""
+        "notes": "Accent family and gender are based on the Kokoro voice ID/catalog; timbre and pitch characteristics have not yet been auditioned."
       },
       "evaluation": {
         "status": "pending",
@@ -401,6 +401,141 @@
         "sample_file": null,
         "reviewed_at": null,
         "notes": ""
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "af_bella",
+      "language": "en",
+      "display_name": "American Female - Bella",
+      "identity": {
+        "gender": "female",
+        "region": "United States",
+        "accent": "American English",
+        "timbre": null,
+        "pitch_range": null,
+        "notes": "Accent family and gender are based on the Kokoro voice ID/catalog; timbre and pitch characteristics have not yet been auditioned."
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": "Pending listening review."
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "am_michael",
+      "language": "en",
+      "display_name": "American Male - Michael",
+      "identity": {
+        "gender": "male",
+        "region": "United States",
+        "accent": "American English",
+        "timbre": null,
+        "pitch_range": null,
+        "notes": "Accent family and gender are based on the Kokoro voice ID/catalog; timbre and pitch characteristics have not yet been auditioned."
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": "Pending listening review."
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "am_fenrir",
+      "language": "en",
+      "display_name": "American Male - Fenrir",
+      "identity": {
+        "gender": "male",
+        "region": "United States",
+        "accent": "American English",
+        "timbre": null,
+        "pitch_range": null,
+        "notes": "Accent family and gender are based on the Kokoro voice ID/catalog; timbre and pitch characteristics have not yet been auditioned."
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": "Pending listening review."
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "bf_emma",
+      "language": "en",
+      "display_name": "British Female - Emma",
+      "identity": {
+        "gender": "female",
+        "region": "United Kingdom",
+        "accent": "British English",
+        "timbre": null,
+        "pitch_range": null,
+        "notes": "Accent family and gender are based on the Kokoro voice ID/catalog; timbre and pitch characteristics have not yet been auditioned."
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": "Pending listening review."
+      },
+      "capabilities": {
+        "speech_styles": [],
+        "expression_controls": []
+      }
+    },
+    {
+      "id": "bm_george",
+      "language": "en",
+      "display_name": "British Male - George",
+      "identity": {
+        "gender": "male",
+        "region": "United Kingdom",
+        "accent": "British English",
+        "timbre": null,
+        "pitch_range": null,
+        "notes": "Accent family and gender are based on the Kokoro voice ID/catalog; timbre and pitch characteristics have not yet been auditioned."
+      },
+      "evaluation": {
+        "status": "pending",
+        "distinctiveness": null,
+        "naturalness": null,
+        "rhythm": null,
+        "expressiveness": null,
+        "sample_file": null,
+        "reviewed_at": null,
+        "notes": "Pending listening review."
       },
       "capabilities": {
         "speech_styles": [],
