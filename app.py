@@ -213,7 +213,7 @@ settings_canvas = tk.Canvas(
     settings_card, bg=C["panel"], highlightthickness=0, bd=0
 )
 settings_scrollbar = ttk.Scrollbar(
-    settings_body, orient="vertical", command=settings_canvas.yview,
+    settings_card, orient="vertical", command=settings_canvas.yview,
     style="Dark.Vertical.TScrollbar"
 )
 settings_canvas.configure(yscrollcommand=settings_scrollbar.set)
