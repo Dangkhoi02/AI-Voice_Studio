@@ -20,11 +20,11 @@ def detect_language(text):
     return "vi" if any(char in text.lower() for char in vietnamese_chars) else "en"
 
 
-def create_unique_filename(file_name):
+def create_unique_filename(file_name, output_dir=None):
     safe_name = re.sub(r'[<>:"/\\|?*]', "", file_name).strip().rstrip(".")
     if not safe_name:
         raise ValueError("Vui lòng nhập tên file hợp lệ.")
-    output_dir = PROJECT_DIR / "output"
+    output_dir = Path(output_dir) if output_dir is not None else PROJECT_DIR / "output"
     output_dir.mkdir(parents=True, exist_ok=True)
     file_path = output_dir / f"{safe_name}.wav"
     counter = 2
@@ -42,6 +42,7 @@ def generate_audio(
     style="conversation",
     expression="natural",
     file_name="audio",
+    output_dir=None,
 ):
     if not text or not text.strip():
         raise ValueError("Vui lòng nhập nội dung văn bản.")
@@ -56,7 +57,7 @@ def generate_audio(
 
     get_speech_style(style, language)
     effective_speed = get_style_speed(style, language) if speed is None else float(speed)
-    save_path = create_unique_filename(file_name)
+    save_path = create_unique_filename(file_name, output_dir=output_dir)
     output_path = str(save_path.relative_to(PROJECT_DIR))
 
     if language == "vi":
@@ -70,3 +71,31 @@ def generate_audio(
             output_path=output_path, expression=expression,
         )
     raise ValueError("Ngôn ngữ không được hỗ trợ.")
+
+
+
+def generate_preview_audio(
+    text,
+    language="auto",
+    voice=None,
+    speed=None,
+    style="conversation",
+    expression="natural",
+):
+    """Generate a temporary preview WAV outside the main Audio Library."""
+    preview_dir = PROJECT_DIR / "output" / ".preview"
+    preview_file = preview_dir / "voice_preview.wav"
+    preview_dir.mkdir(parents=True, exist_ok=True)
+    if preview_file.exists():
+        preview_file.unlink()
+
+    return generate_audio(
+        text=text,
+        language=language,
+        voice=voice,
+        speed=speed,
+        style=style,
+        expression=expression,
+        file_name="voice_preview",
+        output_dir=preview_dir,
+    )
