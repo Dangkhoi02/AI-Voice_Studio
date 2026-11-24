@@ -149,7 +149,8 @@ label(top_left, "Transform your text into natural-sounding speech.", 9, C["muted
 tk.Label(topbar, text="●  ENGINE READY", font=(FONT, 8, "bold"), fg=C["green"],
          bg="#12352F", padx=12, pady=8).pack(side="right", anchor="center")
 
-content = tk.Frame(workspace, bg=C["bg"], padx=24, pady=(0, 22))
+# Tkinter Frame padx/pady options accept a single distance, not a tuple.
+content = tk.Frame(workspace, bg=C["bg"], padx=24, pady=22)
 content.pack(fill="both", expand=True)
 content.columnconfigure(0, weight=1)
 content.columnconfigure(1, weight=0)
