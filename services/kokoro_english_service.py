@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
 
+from services.voice_manager import LANGUAGES
+
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 ENGLISH_PYTHON = PROJECT_DIR / ".venv_en" / "Scripts" / "python.exe"
@@ -8,7 +10,8 @@ ENGLISH_PYTHON = PROJECT_DIR / ".venv_en" / "Scripts" / "python.exe"
 
 def get_kokoro_language_code(voice_id):
     """Resolve Kokoro's pipeline code from a supported English voice ID."""
-    if not isinstance(voice_id, str) or not voice_id.startswith(("a", "b")):
+    supported_ids = {voice["id"] for voice in LANGUAGES["en"]["voices"]}
+    if voice_id not in supported_ids:
         raise ValueError(f"Giọng tiếng Anh Kokoro không hợp lệ: {voice_id}")
     return voice_id[0]
 
