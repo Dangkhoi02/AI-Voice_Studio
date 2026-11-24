@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "description": "Speech-style presets. Only speed is currently applied by the existing TTS engines; other fields are guidance for future expression support.",
+  "styles": [
+    {
+      "id": "conversation",
+      "label": "Hội thoại",
+      "description": "Tự nhiên, gần gũi như đang trò chuyện.",
+      "languages": ["vi", "en"],
+      "speed": 1.0,
+      "delivery_notes": "Giữ nhịp đọc tự nhiên; ưu tiên câu văn ngắn và dấu câu rõ ràng."
+    },
+    {
+      "id": "storytelling",
+      "label": "Kể chuyện",
+      "description": "Nhịp đọc chậm hơn, phù hợp nội dung kể chuyện.",
+      "languages": ["vi", "en"],
+      "speed": 0.92,
+      "delivery_notes": "Có thể chia đoạn và dùng dấu câu để thể hiện nhịp kể. Ngắt nghỉ nâng cao chưa được engine hỗ trợ trực tiếp."
+    },
+    {
+      "id": "narration",
+      "label": "Thuyết minh",
+      "description": "Rõ ràng, đều nhịp, phù hợp giải thích và hướng dẫn.",
+      "languages": ["vi", "en"],
+      "speed": 0.96,
+      "delivery_notes": "Ưu tiên câu rõ nghĩa, thuật ngữ nhất quán và cấu trúc mạch lạc."
+    },
+    {
+      "id": "news",
+      "label": "Tin tức",
+      "description": "Nhịp đọc gọn, rõ và dứt khoát.",
+      "languages": ["vi", "en"],
+      "speed": 1.04,
+      "delivery_notes": "Ưu tiên câu ngắn, thông tin trực tiếp và dấu câu chuẩn."
+    }
+  ]
+}
