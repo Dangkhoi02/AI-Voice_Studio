@@ -239,6 +239,11 @@ expression_options = ttk.Combobox(
 )
 expression_options.current(0)
 expression_options.pack(fill="x", pady=(0, 7))
+label(
+    settings_card,
+    "Điều chỉnh nhịp nghỉ theo dấu câu; chưa thay đổi cảm xúc hoặc cao độ của mô hình.",
+    8, C["muted"], wraplength=245, justify="left"
+).pack(anchor="w", pady=(0, 8))
 
 
 def update_style_options(language_code):
