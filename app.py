@@ -6,7 +6,10 @@ from pathlib import Path
 
 import pygame
 
-from services.tts_manager import generate_audio as create_audio
+from services.tts_manager import (
+    generate_audio as create_audio,
+    generate_preview_audio as create_preview_audio,
+)
 from services.voice_manager import (
     AUTO_VOICE_LABEL,
     get_language_options,
@@ -314,8 +317,16 @@ filename_input.insert(0, "ban_ghi_moi")
 filename_input.pack(fill="x", ipady=10)
 label(settings_body, "File format: WAV", 8, C["muted"]).pack(anchor="w", pady=(7, 0))
 
+preview_button = action_button(settings_body, "♫   PREVIEW VOICE", lambda: None, compact=True)
+preview_button.pack(fill="x", pady=(16, 7))
+label(
+    settings_body,
+    "Nghe thử bằng nội dung trong khung soạn thảo. Nếu để trống, ứng dụng dùng câu mẫu theo ngôn ngữ.",
+    8, C["muted"], wraplength=245, justify="left"
+).pack(anchor="w", pady=(0, 8))
+
 generate_button = action_button(settings_body, "▶   GENERATE AUDIO", lambda: None, primary=True)
-generate_button.pack(fill="x", pady=(16, 0))
+generate_button.pack(fill="x", pady=(4, 0))
 
 # Generate controls and status
 generate_area = tk.Frame(settings_body, bg=C["panel"])
@@ -488,6 +499,95 @@ action_button(library_actions, "Refresh", refresh_audio_list, compact=True).pack
 action_button(library_actions, "Open folder", open_output_folder, compact=True).pack(side="right")
 audio_list.bind("<Double-Button-1>", lambda event: play_selected_audio())
 
+def start_preview_playback(file_path):
+    progress_bar.stop()
+    try:
+        if not pygame.mixer.get_init():
+            pygame.mixer.init()
+        stop_playback()
+        pygame.mixer.music.load(str(file_path))
+        pygame.mixer.music.play()
+        update_status("Playing voice preview...", C["green"])
+        preview_button.config(state="normal")
+
+        def monitor_preview():
+            if pygame.mixer.get_init() and pygame.mixer.music.get_busy():
+                root.after(250, monitor_preview)
+            else:
+                stop_playback()
+                try:
+                    Path(file_path).unlink(missing_ok=True)
+                except OSError:
+                    pass
+                update_status("Voice preview finished.")
+        root.after(250, monitor_preview)
+    except (pygame.error, OSError) as error:
+        preview_button.config(state="normal")
+        messagebox.showerror("Preview error", str(error))
+        update_status("Unable to play preview.", C["red"])
+        try:
+            Path(file_path).unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def preview_audio_worker(content, language, voice, speech_style, expression_label):
+    try:
+        language_code = get_language_code(language)
+        voice_id = get_voice_id(language_code, voice)
+        style_language = language_code if language_code in ("vi", "en") else "vi"
+        style_id = get_style_id(speech_style, style_language)
+        expression_id = get_expression_id(expression_label)
+        file_path = create_preview_audio(
+            text=content,
+            language=language_code,
+            voice=voice_id,
+            style=style_id,
+            expression=expression_id,
+        )
+        root.after(0, lambda: start_preview_playback(file_path))
+    except Exception as error:
+        error_message = str(error)
+        root.after(0, lambda: on_preview_error(error_message))
+
+
+def on_preview_error(error_message):
+    progress_bar.stop()
+    preview_button.config(state="normal")
+    progress_bar.stop()
+    update_status(f"Preview error: {error_message}", C["red"])
+    messagebox.showerror("Unable to preview voice", error_message)
+
+
+def preview_audio():
+    content = text_input.get("1.0", "end-1c").strip()
+    language = language_options.get()
+    voice = voice_options.get()
+    speech_style = style_options.get()
+    expression_label = expression_options.get()
+
+    if not content:
+        language_code = get_language_code(language)
+        content = (
+            "Xin chào! Đây là bản nghe thử giọng đọc của AI Voice Studio."
+            if language_code in ("vi", "auto")
+            else "Hello! This is a voice preview from AI Voice Studio."
+        )
+    if not language or not voice or not speech_style or not expression_label:
+        update_status("Choose a language, voice and speech style.", C["red"])
+        return
+
+    stop_playback()
+    preview_button.config(state="disabled")
+    progress_bar.start(12)
+    update_status("Preparing voice preview...", C["blue"])
+    threading.Thread(
+        target=preview_audio_worker,
+        args=(content, language, voice, speech_style, expression_label),
+        daemon=True,
+    ).start()
+
+
 def on_success(file_path):
     progress_bar.stop()
     refresh_audio_list(file_path)
@@ -545,6 +645,7 @@ def generate_audio():
 
 
 generate_button.config(command=generate_audio)
+preview_button.config(command=preview_audio)
 
 refresh_audio_list()
 
