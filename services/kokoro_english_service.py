@@ -35,7 +35,10 @@ pause_profiles = {
 }
 sentence_pause, clause_pause = pause_profiles.get(expression, pause_profiles["natural"])
 segments = [part.strip() for part in re.split(r"(?<=[,;:])\s+|(?<=[.!?…])\s+", re.sub(r"\s+", " ", text.strip())) if part.strip()]
-pipeline = KPipeline(lang_code="a")
+language_code = voice[:1]
+if language_code not in ("a", "b"):
+    raise ValueError(f"Unsupported Kokoro English voice: {voice}")
+pipeline = KPipeline(lang_code=language_code)
 parts = []
 
 for index, segment in enumerate(segments):
