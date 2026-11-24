@@ -64,11 +64,13 @@ def generate_audio(
     if not text or not text.strip():
         raise ValueError("Vui long nhap noi dung van ban.")
 
-    if language == "auto":
+    auto_language = language == "auto"
+    if auto_language:
         language = detect_language(text)
 
-    # Chon giong doc tuong ung neu nguoi dung bat che do tu dong.
-    if voice in (None, "auto"):
+    # Khi nhan dien ngon ngu tu dong, uu tien giong doc tuong ung
+    # va khong giu lai giong doc khong phu hop da chon truoc do.
+    if auto_language or voice in (None, "auto"):
         voice = "diem_trinh" if language == "vi" else "af_heart"
 
     save_path = create_unique_filename(file_name)
