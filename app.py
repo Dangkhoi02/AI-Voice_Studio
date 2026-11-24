@@ -328,6 +328,9 @@ def stop_playback(show_status=False):
     try:
         if pygame.mixer.get_init():
             pygame.mixer.music.stop()
+            # stop() pauses playback state but may keep the WAV file handle open.
+            # unload() releases the file so Windows can rename or delete it.
+            pygame.mixer.music.unload()
     except pygame.error:
         pass
     if show_status:
