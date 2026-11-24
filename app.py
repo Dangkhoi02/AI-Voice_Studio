@@ -120,15 +120,20 @@ label(brand_text, "VOICE STUDIO", 12, C["text"], True, bg=C["sidebar"]).pack(anc
 label(brand_text, "CREATIVE WORKSPACE", 7, C["muted"], True, bg=C["sidebar"]).pack(anchor="w", pady=(3, 0))
 
 label(sidebar, "WORKSPACE", 8, C["muted"], True, bg=C["sidebar"]).pack(anchor="w", padx=22, pady=(24, 10))
-nav_items = [
-    ("▣", "Voice Studio", True),
-    ("♫", "Audio Library", False),
-]
-for symbol, name, active in nav_items:
-    row = tk.Frame(sidebar, bg="#1B2B49" if active else C["sidebar"], padx=16, pady=12)
+nav_rows = {}
+nav_labels = {}
+for key, symbol, name in [
+    ("studio", "▣", "Voice Studio"),
+    ("library", "♫", "Audio Library"),
+]:
+    row = tk.Frame(sidebar, bg=C["sidebar"], padx=16, pady=12, cursor="hand2")
     row.pack(fill="x", padx=12, pady=3)
-    label(row, symbol, 13, C["blue"] if active else C["muted"], True, bg=row["bg"]).pack(side="left")
-    label(row, name, 10, C["text"] if active else C["muted"], active, bg=row["bg"]).pack(side="left", padx=12)
+    symbol_label = label(row, symbol, 13, C["muted"], True, bg=C["sidebar"])
+    symbol_label.pack(side="left")
+    name_label = label(row, name, 10, C["muted"], False, bg=C["sidebar"])
+    name_label.pack(side="left", padx=12)
+    nav_rows[key] = row
+    nav_labels[key] = (symbol_label, name_label)
 
 sidebar_bottom = tk.Frame(sidebar, bg=C["sidebar"], padx=20, pady=18)
 sidebar_bottom.pack(side="bottom", fill="x")
@@ -260,6 +265,34 @@ audio_list = tk.Listbox(
 audio_scrollbar.config(command=audio_list.yview)
 audio_scrollbar.pack(side="right", fill="y")
 audio_list.pack(side="left", fill="both", expand=True, padx=7, pady=5)
+
+def show_page(page):
+    if page == "library":
+        editor_card.grid_remove()
+        settings_card.grid_remove()
+        library_card.grid_configure(row=0, column=0, columnspan=2, sticky="nsew")
+    else:
+        library_card.grid_configure(row=1, column=0, columnspan=2, sticky="nsew")
+        editor_card.grid()
+        settings_card.grid()
+
+    for key, row in nav_rows.items():
+        active = key == page
+        bg = "#1B2B49" if active else C["sidebar"]
+        row.configure(bg=bg)
+        for item in row.winfo_children():
+            item.configure(bg=bg)
+        symbol_label, name_label = nav_labels[key]
+        symbol_label.configure(fg=C["blue"] if active else C["muted"])
+        name_label.configure(fg=C["text"] if active else C["muted"], font=(FONT, 10, "bold" if active else "normal"))
+
+    if page == "library":
+        refresh_audio_list()
+
+for page_key, row in nav_rows.items():
+    row.bind("<Button-1>", lambda event, key=page_key: show_page(key))
+    for child in row.winfo_children():
+        child.bind("<Button-1>", lambda event, key=page_key: show_page(key))
 
 def update_status(message, color=None):
     status.config(text=message, fg=color or C["muted"])
