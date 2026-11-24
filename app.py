@@ -22,6 +22,7 @@ from services.speech_analyzer import get_expression_options, get_expression_id
 from services.voice_profile_manager import (
     get_voice_profiles, get_profile_review_summary, save_voice_evaluation,
 )
+from services.voice_manager import LANGUAGES
 from services.audio_library import (
     OUTPUT_DIR,
     list_audio_files,
@@ -342,7 +343,7 @@ progress_bar.pack(fill="x", pady=(0, 10))
 
 # Voice Profiles page
 profiles_card = card(content, padx=18, pady=16)
-profiles_card.grid(row=0, column=0, columnspan=2, sticky="nsew")
+profiles_card.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
 profiles_card.grid_remove()
 profiles_header = tk.Frame(profiles_card, bg=C["panel"])
 profiles_header.pack(fill="x", pady=(0, 14))
@@ -527,8 +528,12 @@ def use_selected_profile():
     language_options.set("Tiếng Việt" if profile["language"] == "vi" else "English")
     update_voice_options()
     voice_label = next(
-        (item["label"] for item in __import__("services.voice_manager", fromlist=["LANGUAGES"]).LANGUAGES[profile["language"]]["voices"] if item["id"] == profile["id"]),
-        None
+        (
+            item["label"]
+            for item in LANGUAGES[profile["language"]]["voices"]
+            if item["id"] == profile["id"]
+        ),
+        None,
     )
     if voice_label:
         voice_options.set(voice_label)
@@ -572,7 +577,7 @@ def show_page(page):
         editor_card.grid_remove()
         settings_card.grid_remove()
         library_card.grid_remove()
-        profiles_card.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        profiles_card.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
         refresh_profile_list()
     else:
         library_card.grid_configure(row=1, column=0, columnspan=2, sticky="nsew")
