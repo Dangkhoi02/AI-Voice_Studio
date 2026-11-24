@@ -508,7 +508,6 @@ def start_preview_playback(file_path):
         pygame.mixer.music.load(str(file_path))
         pygame.mixer.music.play()
         update_status("Playing voice preview...", C["green"])
-        preview_button.config(state="normal")
 
         def monitor_preview():
             if pygame.mixer.get_init() and pygame.mixer.music.get_busy():
@@ -520,6 +519,7 @@ def start_preview_playback(file_path):
                 except OSError:
                     pass
                 update_status("Voice preview finished.")
+                preview_button.config(state="normal")
         root.after(250, monitor_preview)
     except (pygame.error, OSError) as error:
         preview_button.config(state="normal")
@@ -554,7 +554,6 @@ def preview_audio_worker(content, language, voice, speech_style, expression_labe
 def on_preview_error(error_message):
     progress_bar.stop()
     preview_button.config(state="normal")
-    progress_bar.stop()
     update_status(f"Preview error: {error_message}", C["red"])
     messagebox.showerror("Unable to preview voice", error_message)
 
