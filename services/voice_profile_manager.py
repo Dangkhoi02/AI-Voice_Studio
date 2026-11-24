@@ -136,9 +136,9 @@ def save_voice_evaluation(
 
     temporary_path = PROFILE_PATH.with_suffix(".json.tmp")
     try:
-        with temporary_path.open("w", encoding="utf-8", newline="\\n") as file:
+        with temporary_path.open("w", encoding="utf-8", newline="\n") as file:
             json.dump(data, file, ensure_ascii=False, indent=2)
-            file.write("\\n")
+            file.write("\n")
         os.replace(temporary_path, PROFILE_PATH)
     finally:
         if temporary_path.exists():
