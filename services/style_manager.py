@@ -69,6 +69,14 @@ def get_style_options(language_code):
     ]
 
 
+def get_style_id(style_label, language_code=None):
+    """Resolve a visible style label to its stable ID."""
+    for style in get_speech_styles(language_code):
+        if style["label"] == style_label:
+            return style["id"]
+    raise ValueError(f"Speech style not found or unsupported: {style_label}")
+
+
 def get_style_speed(style_id, language_code=None):
     """Return the speed preset supported by the current TTS interface."""
     return float(get_speech_style(style_id, language_code)["speed"])
