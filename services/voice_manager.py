@@ -34,7 +34,12 @@ LANGUAGES = {
         "engine": "kokoro_en",
         "default_voice": "af_heart",
         "voices": [
-            {"id": "af_heart", "label": "af_heart"},
+            {"id": "af_heart", "label": "American Female - Heart (af_heart)"},
+            {"id": "af_bella", "label": "American Female - Bella (af_bella)"},
+            {"id": "am_michael", "label": "American Male - Michael (am_michael)"},
+            {"id": "am_fenrir", "label": "American Male - Fenrir (am_fenrir)"},
+            {"id": "bf_emma", "label": "British Female - Emma (bf_emma)"},
+            {"id": "bm_george", "label": "British Male - George (bm_george)"},
         ],
     },
 }
