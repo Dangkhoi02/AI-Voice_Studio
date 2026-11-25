@@ -8,9 +8,11 @@ import traceback
 import numpy as np
 import soundfile as sf
 from kokoro_vietnamese import KokoroVietnamese, SAMPLE_RATE
+from services.speech_analyzer import split_text_segments
 
 _PROTOCOL_OUT = sys.stdout
-_MODELS = {}
+_MODEL = None
+_VOICE = None
 _PAUSES = {
     "natural": (220, 100), "enthusiastic": (150, 70),
     "gentle": (320, 150), "serious": (280, 120),
@@ -19,9 +21,11 @@ _PAUSES = {
 
 def _synthesize(request):
     voice = request["voice"]
-    if voice not in _MODELS:
-        _MODELS[voice] = KokoroVietnamese(voice=voice, device="cpu")
-    model = _MODELS[voice]
+    global _MODEL, _VOICE
+    if _MODEL is None or _VOICE != voice:
+        _MODEL = KokoroVietnamese(voice=voice, device="cpu")
+        _VOICE = voice
+    model = _MODEL
     normalized = re.sub(r"\s+", " ", request["text"].strip())
     segments = [
         part.strip()
