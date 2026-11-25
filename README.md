@@ -65,7 +65,7 @@ These runtime folders are ignored by Git. If the evaluation file is malformed, t
 
 ## Notes
 
-Speech Style currently adjusts the engine's supported speed preset. Expression changes pauses between text segments; it does not change the model's emotional tone or pitch.
+Speech Style currently adjusts the engine's supported speed preset. Expression changes pauses between text segments; it does not change the model's emotional tone or pitch. Auto language detection currently selects one engine for the whole input; mixed Vietnamese-English text is not yet switched sentence by sentence.
 
 The application uses the upstream Kokoro-Vietnamese submodule. Review that project's current license and model terms before redistributing the application or its bundled model assets. Optional integrations are listed separately in `requirements-optional.txt`.
 
