@@ -9,8 +9,10 @@ from services import voice_profile_manager as profiles
 class VoiceProfileManagerTests(unittest.TestCase):
     def test_catalog_contains_all_supported_voices(self):
         records = profiles.get_voice_profiles()
-        self.assertEqual(len(records), 20)
-        self.assertEqual(profiles.get_profile_review_summary()["total"], 20)
+        from services.voice_manager import LANGUAGES
+        expected = sum(len(item["voices"]) for item in LANGUAGES.values())
+        self.assertEqual(len(records), expected)
+        self.assertEqual(profiles.get_profile_review_summary()["total"], expected)
 
     def test_save_evaluation_persists_scores_and_notes(self):
         with tempfile.TemporaryDirectory() as directory:
