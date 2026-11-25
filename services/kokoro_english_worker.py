@@ -73,7 +73,7 @@ def main():
             except Exception as error:
                 response = {
                     "id": request_id, "ok": False,
-                    "error": f"{type(error).__name__}: {error}",
+                    "error": f"{type(error).__name__}: {error}\\n{traceback.format_exc()}",
                 }
             _PROTOCOL_OUT.write(json.dumps(response, ensure_ascii=False) + "\n")
             _PROTOCOL_OUT.flush()
