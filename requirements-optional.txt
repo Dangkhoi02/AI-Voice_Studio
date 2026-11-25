@@ -1,0 +1,3 @@
+# Optional integrations not required by the core local TTS application.
+openai
+python-dotenv
