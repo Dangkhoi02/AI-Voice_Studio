@@ -50,7 +50,7 @@ def create_unique_filename(file_name, output_dir=None):
 
 def generate_audio(
     text, language="auto", voice=None, speed=None, style="conversation",
-    expression="natural", file_name="audio", output_dir=None,
+    expression="natural", file_name="audio", output_dir=None, cancel_event=None,
 ):
     if not isinstance(text, str) or not text.strip():
         raise ValueError("Vui lòng nhập nội dung văn bản.")
@@ -79,7 +79,7 @@ def generate_audio(
     engine = generate_vietnamese_audio if language == "vi" else generate_english_audio
     return engine(
         text=text, voice=voice, speed=effective_speed,
-        output_path=output_path, expression=expression,
+        output_path=output_path, expression=expression, cancel_event=cancel_event,
     )
 
 
