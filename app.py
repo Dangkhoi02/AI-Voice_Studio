@@ -39,9 +39,9 @@ from services.audio_library import (
 # Keep the existing TTS and audio-library services.
 # =========================================================
 def main():
-        logger = setup_logging()
-        root = tk.Tk()
-        root.title("AI Voice Studio")
+    logger = setup_logging()
+    root = tk.Tk()
+    root.title("AI Voice Studio")
     root.geometry("1280x850")
     root.minsize(1080, 720)
     root.configure(bg="#0B1020")
