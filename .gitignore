@@ -3,6 +3,7 @@
 __pycache__/
 .env
 output/
+logs/
 *.pyc
 /data/voice_evaluations.json
 /data/voice_evaluations.json.tmp
