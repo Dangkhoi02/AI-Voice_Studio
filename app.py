@@ -444,7 +444,14 @@ def main():
     label(profile_detail, "ĐÁNH GIÁ GIỌNG ĐỌC (1–5)", 8, C["muted"], True).grid(
         row=2, column=0, columnspan=2, sticky="w", pady=(0, 8)
     )
-    profile_rating_entries = {}
+    profile_rating_values = {}
+    profile_rating_buttons = {}
+
+    def set_profile_rating(field, value):
+        profile_rating_values[field].set(value)
+        for score, button in enumerate(profile_rating_buttons[field], start=1):
+            button.config(fg=C["purple"] if score <= value else C["muted"])
+
     for row_index, (field, caption_text) in enumerate([
         ("distinctiveness", "Độ khác biệt"),
         ("naturalness", "Độ tự nhiên"),
@@ -452,22 +459,29 @@ def main():
         ("expressiveness", "Biểu cảm"),
     ], start=3):
         label(profile_detail, caption_text, 9, C["muted"]).grid(
-            row=row_index, column=0, sticky="w", pady=4
+            row=row_index, column=0, sticky="w", pady=5
         )
-        entry = tk.Entry(
-            profile_detail, width=8, font=(FONT, 9), relief="flat",
-            bg=C["input"], fg=C["text"], insertbackground=C["blue"],
-            highlightthickness=1, highlightbackground=C["border"]
-        )
-        entry.grid(row=row_index, column=1, sticky="w", pady=4, ipady=4)
-        profile_rating_entries[field] = entry
-    
+        rating_value = tk.IntVar(value=0)
+        profile_rating_values[field] = rating_value
+        star_row = tk.Frame(profile_detail, bg=C["panel"])
+        star_row.grid(row=row_index, column=1, sticky="w", pady=3)
+        profile_rating_buttons[field] = []
+        for score in range(1, 6):
+            star = tk.Button(
+                star_row, text="★", font=(FONT, 15), relief="flat", bd=0,
+                bg=C["panel"], fg=C["muted"], cursor="hand2",
+                activebackground=C["panel"], activeforeground=C["purple"],
+                command=lambda f=field, s=score: set_profile_rating(f, s),
+            )
+            star.pack(side="left", padx=1)
+            profile_rating_buttons[field].append(star)
+
     status_row = 7
     label(profile_detail, "TRẠNG THÁI", 8, C["muted"], True).grid(
         row=status_row, column=0, sticky="w", pady=(12, 6)
     )
     profile_status = ttk.Combobox(
-        profile_detail, values=["pending", "reviewed", "needs_retest"],
+        profile_detail, values=["Chưa đánh giá", "Đã đánh giá", "Cần nghe lại"],
         state="readonly", style="Dark.TCombobox", width=18
     )
     profile_status.grid(row=status_row, column=1, sticky="w", pady=(12, 6))
@@ -482,9 +496,9 @@ def main():
     profile_notes.grid(row=9, column=0, columnspan=2, sticky="ew")
     profile_action_row = tk.Frame(profile_detail, bg=C["panel"])
     profile_action_row.grid(row=10, column=0, columnspan=2, sticky="ew", pady=(12, 0))
-    profile_save_button = action_button(profile_action_row, "Save evaluation", lambda: save_selected_profile(), primary=True, compact=True)
+    profile_save_button = action_button(profile_action_row, "Lưu đánh giá", lambda: save_selected_profile(), primary=True, compact=True)
     profile_save_button.pack(side="left", padx=(0, 8))
-    profile_use_button = action_button(profile_action_row, "Use in Studio", lambda: use_selected_profile(), compact=True)
+    profile_use_button = action_button(profile_action_row, "Dùng giọng này", lambda: use_selected_profile(), compact=True)
     profile_use_button.pack(side="left")
     
     profile_records = []
@@ -541,12 +555,12 @@ def main():
             f"Chất giọng: {identity.get('timbre') or 'Chưa đánh giá'}",
         ]
         profile_identity_label.config(text="   •   ".join(identity_parts))
-        for field, entry in profile_rating_entries.items():
-            entry.delete(0, tk.END)
-            value = evaluation.get(field)
-            if value is not None:
-                entry.insert(0, str(value))
-        profile_status.set(evaluation.get("status", "pending"))
+        for field, rating_value in profile_rating_values.items():
+            value = evaluation.get(field) or 0
+            rating_value.set(value)
+            set_profile_rating(field, value)
+        status_labels = {"pending": "Chưa đánh giá", "reviewed": "Đã đánh giá", "needs_retest": "Cần nghe lại"}
+        profile_status.set(status_labels.get(evaluation.get("status", "pending"), "Chưa đánh giá"))
         profile_notes.delete("1.0", tk.END)
         profile_notes.insert("1.0", evaluation.get("notes") or "")
     
@@ -556,20 +570,14 @@ def main():
             return
         ratings = {}
         try:
-            for field, entry in profile_rating_entries.items():
-                raw_value = entry.get().strip()
-                if not raw_value:
-                    ratings[field] = None
-                    continue
-                value = int(raw_value)
-                if not 1 <= value <= 5:
-                    raise ValueError("Điểm đánh giá phải nằm trong khoảng 1 đến 5.")
-                ratings[field] = value
+            for field, rating_value in profile_rating_values.items():
+                value = rating_value.get()
+                ratings[field] = value or None
             save_voice_evaluation(
                 voice_id=profile["id"],
                 language_code=profile["language"],
                 ratings=ratings,
-                status=profile_status.get(),
+                status={"Chưa đánh giá": "pending", "Đã đánh giá": "reviewed", "Cần nghe lại": "needs_retest"}[profile_status.get()],
                 notes=profile_notes.get("1.0", "end-1c").strip(),
             )
             refresh_profile_list(profile["id"])
