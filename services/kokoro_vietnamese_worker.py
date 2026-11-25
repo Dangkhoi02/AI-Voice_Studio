@@ -54,7 +54,7 @@ def _synthesize(request):
         raise RuntimeError("Không tạo được âm thanh từ văn bản.")
     destination = request["output"]
     temporary = destination + ".part"
-    sf.write(temporary, np.concatenate(audio_parts), SAMPLE_RATE)
+    sf.write(temporary, np.concatenate(audio_parts), SAMPLE_RATE, format="WAV")
     os.replace(temporary, destination)
     return destination
 
