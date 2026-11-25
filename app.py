@@ -140,14 +140,14 @@ def main():
     brand_mark.pack(side="left")
     brand_text = tk.Frame(brand, bg=C["sidebar"])
     brand_text.pack(side="left", padx=10)
-    label(brand_text, "VOICE STUDIO", 12, C["text"], True, bg=C["sidebar"]).pack(anchor="w")
-    label(brand_text, "CREATIVE WORKSPACE", 7, C["muted"], True, bg=C["sidebar"]).pack(anchor="w", pady=(3, 0))
+    label(brand_text, "PHÒNG THU GIỌNG NÓI", 12, C["text"], True, bg=C["sidebar"]).pack(anchor="w")
+    label(brand_text, "KHÔNG GIAN SÁNG TẠO", 7, C["muted"], True, bg=C["sidebar"]).pack(anchor="w", pady=(3, 0))
     
-    label(sidebar, "WORKSPACE", 8, C["muted"], True, bg=C["sidebar"]).pack(anchor="w", padx=22, pady=(24, 10))
+    label(sidebar, "KHÔNG GIAN LÀM VIỆC", 8, C["muted"], True, bg=C["sidebar"]).pack(anchor="w", padx=22, pady=(24, 10))
     nav_rows = {}
     nav_labels = {}
     for key, symbol, name in [
-        ("studio", "▣", "Voice Studio"),
+        ("studio", "▣", "Phòng thu giọng nói"),
         ("library", "♫", "Thư viện âm thanh"),
         ("profiles", "◎", "Hồ sơ giọng đọc"),
     ]:
@@ -257,8 +257,13 @@ def main():
     label(editor_footer, "Hỗ trợ Tiếng Việt và English", 8, C["muted"]).pack(side="right")
     
     def update_char_count(event=None):
-        count = len(text_input.get("1.0", "end-1c"))
-        char_count.config(text=f"{count:,} ký tự")
+        content = text_input.get("1.0", "end-1c").strip()
+        count = len(content)
+        estimate = max(1, round(count / 900)) if count else 0
+        warning = " · Văn bản dài, nên thêm dấu câu" if count > 800 and not any(mark in content for mark in ".!?…") else ""
+        char_count.config(
+            text=f"{count:,} ký tự" + (f" · khoảng {estimate} phút" if count else "") + warning
+        )
     text_input.bind("<KeyRelease>", update_char_count)
     
     # Voice settings panel with its own vertical scrolling area.
@@ -371,7 +376,7 @@ def main():
     filename_input.pack(fill="x", ipady=10)
     label(settings_body, "Định dạng: WAV", 8, C["muted"]).pack(anchor="w", pady=(7, 0))
     
-    preview_button = action_button(settings_body, "♫   NGHE THỬ", lambda: None, compact=True)
+    preview_button = action_button(settings_body, "♫   NGHE THỬ (200 KÝ TỰ ĐẦU)", lambda: None, compact=True)
     preview_button.pack(fill="x", pady=(16, 7))
     label(
         settings_body,
@@ -722,7 +727,7 @@ def main():
     def get_selected_audio():
         selection = audio_list.curselection()
         if not selection:
-            messagebox.showinfo("Thư viện âm thanh", "Please select a recording first.")
+            messagebox.showinfo("Thư viện âm thanh", "Vui lòng chọn một bản ghi trước.")
             return None
         index = selection[0]
         if index >= len(audio_paths):
@@ -752,15 +757,15 @@ def main():
             pygame.mixer.music.play()
             update_status(f"Đang phát: {file_path.name}", C["green"])
         except (pygame.error, OSError) as error:
-            messagebox.showerror("Playback error", str(error))
-            update_status("Unable to play recording.", C["red"])
+            messagebox.showerror("Lỗi phát âm thanh", str(error))
+            update_status("Không thể phát bản ghi.", C["red"])
     
     def rename_selected_audio():
         file_path = get_selected_audio()
         if file_path is None:
             return
         new_name = simpledialog.askstring(
-            "Rename recording", "Enter a new name (without .wav):",
+            "Đổi tên bản ghi", "Nhập tên mới (không cần .wav):",
             initialvalue=file_path.stem, parent=root
         )
         if new_name is None:
@@ -771,14 +776,14 @@ def main():
             refresh_audio_list(renamed_path)
             update_status(f"Renamed: {renamed_path.name}", C["green"])
         except (ValueError, FileExistsError, FileNotFoundError, OSError) as error:
-            messagebox.showerror("Rename failed", str(error))
-            update_status("Rename failed.", C["red"])
+            messagebox.showerror("Đổi tên thất bại", str(error))
+            update_status("Đổi tên thất bại.", C["red"])
     
     def delete_selected_audio():
         file_path = get_selected_audio()
         if file_path is None:
             return
-        if not messagebox.askyesno("Delete recording", f"Delete '{file_path.name}'?", parent=root):
+        if not messagebox.askyesno("Xóa bản ghi", f"Delete '{file_path.name}'?", parent=root):
             return
         try:
             stop_playback()
@@ -798,7 +803,7 @@ def main():
                 import subprocess
                 subprocess.Popen(["xdg-open", str(OUTPUT_DIR)])
         except OSError as error:
-            messagebox.showerror("Cannot open folder", str(error))
+            messagebox.showerror("Không thể mở thư mục", str(error))
     
     library_actions = tk.Frame(library_card, bg=C["panel"])
     library_actions.pack(fill="x", pady=(10, 0))
@@ -834,8 +839,8 @@ def main():
             root.after(250, monitor_preview)
         except (pygame.error, OSError) as error:
             preview_button.config(state="normal")
-            messagebox.showerror("Preview error", str(error))
-            update_status("Unable to play preview.", C["red"])
+            messagebox.showerror("Lỗi nghe thử", str(error))
+            update_status("Không thể phát bản nghe thử.", C["red"])
             try:
                 Path(file_path).unlink(missing_ok=True)
             except OSError:
@@ -886,7 +891,7 @@ def main():
                 else "Hello! This is a voice preview from AI Voice Studio."
             )
         if not language or not voice or not speech_style or not expression_label:
-            update_status("Choose a language, voice and speech style.", C["red"])
+            update_status("Vui lòng chọn ngôn ngữ, giọng đọc và phong cách.", C["red"])
             return
     
         if is_busy:
@@ -905,7 +910,7 @@ def main():
     def on_success(file_path):
         set_busy(False)
         refresh_audio_list(file_path)
-        update_status(f"Created successfully: {file_path.name}", C["green"])
+        update_status(f"Đã tạo thành công: {file_path.name}", C["green"])
         generate_button.config(state="normal")
     
     def on_error(error_message):
@@ -944,11 +949,11 @@ def main():
         expression_label = expression_options.get()
         file_name = filename_input.get().strip() or "ban_ghi_moi"
         if not content:
-            update_status("Please enter some text first.", C["red"])
+            update_status("Vui lòng nhập nội dung trước.", C["red"])
             text_input.focus_set()
             return
         if not language or not voice or not speech_style or not expression_label:
-            update_status("Choose a language, voice and speech style.", C["red"])
+            update_status("Vui lòng chọn ngôn ngữ, giọng đọc và phong cách.", C["red"])
             return
         if is_busy:
             return
