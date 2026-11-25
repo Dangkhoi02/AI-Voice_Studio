@@ -2,8 +2,8 @@ from pathlib import Path
 import unicodedata
 
 from services.audio_library import sanitize_stem
-from services.kokoro_service import generate_vietnamese_audio
-from services.kokoro_english_service import generate_english_audio
+from services.kokoro_service import generate_vietnamese_audio, cancel_active_generation as cancel_vietnamese_generation
+from services.kokoro_english_service import generate_english_audio, cancel_active_generation as cancel_english_generation
 from services.voice_manager import LANGUAGES, get_default_voice
 from services.style_manager import get_style_speed, get_speech_style
 from services.speech_analyzer import EXPRESSION_PROFILES
@@ -17,6 +17,12 @@ _VI_COMMON_UNACCENTED = {
     "xin", "chao", "toi", "la", "cac", "ban", "minh", "khong",
     "nguoi", "viet", "nam", "cam", "on", "xin", "duoc", "mot",
 }
+
+
+def cancel_active_generation():
+    """Cancel either persistent engine worker, if active."""
+    cancel_vietnamese_generation()
+    cancel_english_generation()
 
 
 def detect_language(text):
