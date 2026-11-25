@@ -976,6 +976,10 @@ def main():
         stop_playback()
         progress_bar.stop()
         try:
+            (OUTPUT_DIR / ".preview" / "voice_preview.wav").unlink(missing_ok=True)
+        except OSError:
+            logger.exception("Unable to remove temporary preview audio during shutdown")
+        try:
             pygame.mixer.quit()
         except pygame.error:
             pass
