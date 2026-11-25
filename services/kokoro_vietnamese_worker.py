@@ -27,11 +27,7 @@ def _synthesize(request):
         _VOICE = voice
     model = _MODEL
     normalized = re.sub(r"\s+", " ", request["text"].strip())
-    segments = [
-        part.strip()
-        for part in re.split(r"(?<=[,;:])\s+|(?<=[.!?…])\s+", normalized)
-        if part.strip()
-    ]
+    segments = split_text_segments(normalized)
     sentence_pause, clause_pause = _PAUSES.get(
         request.get("expression", "natural"), _PAUSES["natural"]
     )
