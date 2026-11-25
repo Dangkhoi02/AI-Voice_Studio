@@ -68,3 +68,7 @@ These runtime folders are ignored by Git. If the evaluation file is malformed, t
 Speech Style currently adjusts the engine's supported speed preset. Expression changes pauses between text segments; it does not change the model's emotional tone or pitch.
 
 The application uses the upstream Kokoro-Vietnamese submodule. Review that project's current license and model terms before redistributing the application or its bundled model assets. Optional integrations are listed separately in `requirements-optional.txt`.
+
+## Legacy modules
+
+The current desktop application uses the local Kokoro engines in `services/kokoro_service.py` and `services/kokoro_english_service.py`. The older `services/tts_service.py` and `services/gemini_tts.py` files are not part of the active application flow. They are retained as legacy reference code for now; do not assume they are configured or production-ready.
