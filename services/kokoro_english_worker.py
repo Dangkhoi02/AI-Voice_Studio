@@ -8,6 +8,7 @@ import traceback
 
 import numpy as np
 import soundfile as sf
+from services.speech_analyzer import split_text_segments
 
 _PROTOCOL_OUT = sys.stdout
 with contextlib.redirect_stdout(sys.stderr):
@@ -22,11 +23,7 @@ def _synthesize(request):
             _PIPELINES[language_code] = KPipeline(lang_code=language_code)
     pipeline = _PIPELINES[language_code]
     text = re.sub(r"\s+", " ", request["text"].strip())
-    segments = [
-        part.strip()
-        for part in re.split(r"(?<=[,;:])\s+|(?<=[.!?…])\s+", text)
-        if part.strip()
-    ]
+    segments = split_text_segments(text)
     pauses = {
         "natural": (220, 100), "enthusiastic": (150, 70),
         "gentle": (320, 150), "serious": (280, 120),
