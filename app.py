@@ -175,8 +175,21 @@ def main():
     top_left.pack(side="left", fill="x", expand=True)
     label(top_left, "Voice Studio", 20, C["text"], True, bg=C["bg"]).pack(anchor="w")
     label(top_left, "Transform your text into natural-sounding speech.", 9, C["muted"], bg=C["bg"]).pack(anchor="w", pady=(4, 0))
-    tk.Label(topbar, text="●  ENGINE READY", font=(FONT, 8, "bold"), fg=C["green"],
-             bg="#12352F", padx=12, pady=8).pack(side="right", anchor="center")
+    engine_status = tk.Label(topbar, text="", font=(FONT, 9, "bold"), fg=C["green"],
+                             bg="#12352F", padx=12, pady=8)
+    engine_status.pack(side="right", anchor="center")
+    try:
+        import importlib.util
+        vi_ready = importlib.util.find_spec("kokoro_vietnamese") is not None
+    except (ImportError, ValueError):
+        vi_ready = False
+    en_ready = ENGLISH_PYTHON.is_file()
+    if vi_ready and en_ready:
+        engine_status.config(text="●  ENGINE SẴN SÀNG", fg=C["green"])
+    elif vi_ready:
+        engine_status.config(text="●  THIẾU ENGINE EN", fg="#F5B942")
+    else:
+        engine_status.config(text="●  THIẾU ENGINE VI", fg="#F5B942")
     
     # Tkinter Frame padx/pady options accept a single distance, not a tuple.
     content = tk.Frame(workspace, bg=C["bg"], padx=24, pady=22)
@@ -810,7 +823,7 @@ def main():
             ui_queue.put(lambda: start_preview_playback(file_path))
         except Exception as error:
             error_message = str(error)
-            ui_queue.put(lambda: on_preview_error(error_message))
+            ui_queue.put(lambda error_message=error_message: on_preview_error(error_message))
     
     
     def on_preview_error(error_message):
@@ -881,7 +894,7 @@ def main():
             ui_queue.put(lambda: on_success(file_path))
         except Exception as error:
             error_message = str(error)
-            ui_queue.put(lambda: on_error(error_message))
+            ui_queue.put(lambda error_message=error_message: on_error(error_message))
     
     def generate_audio():
         nonlocal current_cancel_event, active_worker
