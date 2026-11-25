@@ -14,6 +14,7 @@ _ABBREVIATIONS = {
     "pgs.", "gs.", "ts.", "ths.", "etc.",
 }
 _NUMBERING_PATTERN = re.compile(r"\d{1,3}[.)]")
+_INITIAL_PATTERN = re.compile(r"[A-ZĐ]\.", re.IGNORECASE)
 
 
 def get_expression_options():
