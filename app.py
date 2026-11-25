@@ -42,6 +42,7 @@ def main():
     logger = setup_logging()
     root = tk.Tk()
     root.title("AI Voice Studio")
+    ui_queue = queue.Queue()
     root.geometry("1280x850")
     root.minsize(1080, 720)
     root.configure(bg="#0B1020")
@@ -346,6 +347,42 @@ def main():
     status.pack(anchor="w", pady=(0, 9))
     progress_bar = ttk.Progressbar(generate_area, mode="indeterminate", style="Dark.Horizontal.TProgressbar")
     progress_bar.pack(fill="x", pady=(0, 10))
+    cancel_button = action_button(generate_area, "Hủy tác vụ", lambda: cancel_generation(), compact=True)
+    cancel_button.pack(fill="x", pady=(0, 8))
+    cancel_button.config(state="disabled")
+    is_busy = False
+    current_cancel_event = None
+    active_worker = None
+
+    def set_busy(flag, message=None, color=None):
+        nonlocal is_busy
+        is_busy = flag
+        state = "disabled" if flag else "normal"
+        generate_button.config(state=state)
+        preview_button.config(state=state)
+        cancel_button.config(state="normal" if flag else "disabled")
+        progress_bar.start(12) if flag else progress_bar.stop()
+        if message:
+            update_status(message, color)
+
+    def cancel_generation():
+        if not is_busy or current_cancel_event is None:
+            return
+        current_cancel_event.set()
+        cancel_active_generation()
+        cancel_button.config(state="disabled")
+        update_status("Đang hủy tác vụ…", "#F5B942")
+
+    def poll_ui_queue():
+        try:
+            while True:
+                ui_queue.get_nowait()()
+        except queue.Empty:
+            pass
+        if root.winfo_exists():
+            root.after(80, poll_ui_queue)
+
+    poll_ui_queue()
     
     # Voice Profiles page
     profiles_card = card(content, padx=18, pady=16)
@@ -612,9 +649,12 @@ def main():
     def update_status(message, color=None):
         status.config(text=message, fg=color or C["muted"])
     
+    audio_paths = []
+
     def refresh_audio_list(select_path=None):
         audio_list.delete(0, tk.END)
         files = list_audio_files()
+        audio_paths[:] = files
         for file_path in files:
             audio_list.insert(tk.END, f"♫   {file_path.name}")
         if select_path:
@@ -626,7 +666,7 @@ def main():
                     audio_list.see(index)
                     break
         if not files:
-            audio_list.insert(tk.END, "   No recordings yet")
+            audio_list.insert(tk.END, "Chưa có bản ghi nào. Hãy tạo giọng nói đầu tiên!")
         return files
     
     def get_selected_audio():
@@ -634,10 +674,10 @@ def main():
         if not selection:
             messagebox.showinfo("Audio Library", "Please select a recording first.")
             return None
-        selected = audio_list.get(selection[0]).replace("♫   ", "", 1)
-        if selected == "No recordings yet":
+        index = selection[0]
+        if index >= len(audio_paths):
             return None
-        return OUTPUT_DIR / selected
+        return audio_paths[index]
     
     def stop_playback(show_status=False):
         try:
@@ -721,7 +761,7 @@ def main():
     audio_list.bind("<Double-Button-1>", lambda event: play_selected_audio())
     
     def start_preview_playback(file_path):
-        progress_bar.stop()
+        set_busy(False)
         try:
             if not pygame.mixer.get_init():
                 pygame.mixer.init()
@@ -752,7 +792,7 @@ def main():
                 pass
     
     
-    def preview_audio_worker(content, language, voice, speech_style, expression_label):
+    def preview_audio_worker(content, language, voice, speech_style, expression_label, task_cancel_event):
         try:
             language_code = get_language_code(language)
             voice_id = get_voice_id(language_code, voice)
@@ -765,21 +805,22 @@ def main():
                 voice=voice_id,
                 style=style_id,
                 expression=expression_id,
+                cancel_event=task_cancel_event,
             )
-            root.after(0, lambda: start_preview_playback(file_path))
+            ui_queue.put(lambda: start_preview_playback(file_path))
         except Exception as error:
             error_message = str(error)
-            root.after(0, lambda: on_preview_error(error_message))
+            ui_queue.put(lambda: on_preview_error(error_message))
     
     
     def on_preview_error(error_message):
-        progress_bar.stop()
-        preview_button.config(state="normal")
-        update_status(f"Preview error: {error_message}", C["red"])
-        messagebox.showerror("Unable to preview voice", error_message)
+        set_busy(False, "Không thể nghe thử. Chi tiết đã được ghi vào logs/app.log.", C["red"])
+        logger.exception("Voice preview failed: %s", error_message)
+        messagebox.showerror("Không thể nghe thử", "Đã xảy ra lỗi khi tạo bản nghe thử. Chi tiết đã được ghi vào logs/app.log.")
     
     
     def preview_audio():
+        nonlocal current_cancel_event, active_worker
         content = text_input.get("1.0", "end-1c").strip()
         language = language_options.get()
         voice = voice_options.get()
@@ -797,30 +838,31 @@ def main():
             update_status("Choose a language, voice and speech style.", C["red"])
             return
     
+        if is_busy:
+            return
         stop_playback()
-        preview_button.config(state="disabled")
-        progress_bar.start(12)
-        update_status("Preparing voice preview...", C["blue"])
-        threading.Thread(
+        current_cancel_event = threading.Event()
+        set_busy(True, "Đang chuẩn bị bản nghe thử…", C["blue"])
+        active_worker = threading.Thread(
             target=preview_audio_worker,
-            args=(content, language, voice, speech_style, expression_label),
+            args=(content, language, voice, speech_style, expression_label, current_cancel_event),
             daemon=True,
-        ).start()
+        )
+        active_worker.start()
     
     
     def on_success(file_path):
-        progress_bar.stop()
+        set_busy(False)
         refresh_audio_list(file_path)
         update_status(f"Created successfully: {file_path.name}", C["green"])
         generate_button.config(state="normal")
     
     def on_error(error_message):
-        progress_bar.stop()
-        update_status(f"Error: {error_message}", C["red"])
-        generate_button.config(state="normal")
-        messagebox.showerror("Unable to generate speech", error_message)
-    
-    def generate_audio_worker(content, language, voice, speech_style, expression_label, file_name):
+        set_busy(False, "Không thể tạo giọng nói. Chi tiết đã được ghi vào logs/app.log.", C["red"])
+        logger.exception("Speech generation failed: %s", error_message)
+        messagebox.showerror("Không thể tạo giọng nói", "Đã xảy ra lỗi khi tạo âm thanh. Chi tiết đã được ghi vào logs/app.log.")
+
+    def generate_audio_worker(content, language, voice, speech_style, expression_label, file_name, task_cancel_event):
         try:
             language_code = get_language_code(language)
             voice_id = get_voice_id(language_code, voice)
@@ -834,13 +876,15 @@ def main():
                 style=style_id,
                 expression=expression_id,
                 file_name=file_name,
+                cancel_event=task_cancel_event,
             )
-            root.after(0, lambda: on_success(file_path))
+            ui_queue.put(lambda: on_success(file_path))
         except Exception as error:
             error_message = str(error)
-            root.after(0, lambda: on_error(error_message))
+            ui_queue.put(lambda: on_error(error_message))
     
     def generate_audio():
+        nonlocal current_cancel_event, active_worker
         content = text_input.get("1.0", "end-1c").strip()
         language = language_options.get()
         voice = voice_options.get()
@@ -854,14 +898,16 @@ def main():
         if not language or not voice or not speech_style or not expression_label:
             update_status("Choose a language, voice and speech style.", C["red"])
             return
-        generate_button.config(state="disabled")
-        progress_bar.start(12)
-        update_status("Generating your voice...", C["blue"])
-        threading.Thread(
+        if is_busy:
+            return
+        current_cancel_event = threading.Event()
+        set_busy(True, "Đang tạo giọng nói…", C["blue"])
+        active_worker = threading.Thread(
             target=generate_audio_worker,
-            args=(content, language, voice, speech_style, expression_label, file_name),
+            args=(content, language, voice, speech_style, expression_label, file_name, current_cancel_event),
             daemon=True,
-        ).start()
+        )
+        active_worker.start()
     
     
     generate_button.config(command=generate_audio)
@@ -870,6 +916,11 @@ def main():
     refresh_audio_list()
     
     def close_application():
+        if current_cancel_event is not None:
+            current_cancel_event.set()
+        cancel_active_generation()
+        if active_worker is not None and active_worker.is_alive():
+            active_worker.join(timeout=2)
         stop_playback()
         progress_bar.stop()
         try:
