@@ -96,7 +96,7 @@ def preview_excerpt(text, max_chars=200):
 
 def generate_preview_audio(
     text, language="auto", voice=None, speed=None, style="conversation",
-    expression="natural",
+    expression="natural", cancel_event=None,
 ):
     preview_dir = PROJECT_DIR / "output" / ".preview"
     preview_dir.mkdir(parents=True, exist_ok=True)
@@ -105,5 +105,5 @@ def generate_preview_audio(
     return generate_audio(
         text=preview_excerpt(text), language=language, voice=voice, speed=speed,
         style=style, expression=expression, file_name="voice_preview",
-        output_dir=preview_dir,
+        output_dir=preview_dir, cancel_event=cancel_event,
     )
