@@ -32,7 +32,7 @@ def _is_non_boundary(part):
     if not words:
         return False
     return words[-1].lower() in _ABBREVIATIONS or bool(
-        _NUMBERING_PATTERN.fullmatch(part.strip())
+        _NUMBERING_PATTERN.fullmatch(words[-1])
     )
 
 
