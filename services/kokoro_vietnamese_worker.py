@@ -25,7 +25,8 @@ def _synthesize(request):
     voice = request["voice"]
     global _MODEL, _VOICE
     if _MODEL is None or _VOICE != voice:
-        _MODEL = KokoroVietnamese(voice=voice, device="cpu")
+        with contextlib.redirect_stdout(sys.stderr):
+            _MODEL = KokoroVietnamese(voice=voice, device="cpu")
         _VOICE = voice
     model = _MODEL
     normalized = re.sub(r"\s+", " ", request["text"].strip())
