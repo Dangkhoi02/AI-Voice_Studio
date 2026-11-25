@@ -33,7 +33,9 @@ def detect_language(text):
     letters = [char for char in normalized if char.isalpha()]
     if not letters:
         return "en"
-    if any(ord(char) > 0x024F for char in letters):
+    # Vietnamese uses Latin letters with extended Unicode code points.
+    # Reject unsupported scripts by Unicode name, not by code-point range.
+    if any(not unicodedata.name(char, "").startswith("LATIN ") for char in letters):
         raise ValueError("Ngôn ngữ này hiện chưa được hỗ trợ. Hãy chọn Tiếng Việt hoặc English.")
     vi_ratio = sum(char in _VI_ONLY for char in letters) / len(letters)
     if vi_ratio >= 0.02:
