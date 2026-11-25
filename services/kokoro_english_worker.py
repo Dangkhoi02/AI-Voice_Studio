@@ -56,7 +56,7 @@ def _synthesize(request):
         raise RuntimeError("Kokoro không tạo được âm thanh.")
     destination = request["output"]
     temporary = destination + ".part"
-    sf.write(temporary, np.concatenate(parts), 24000)
+    sf.write(temporary, np.concatenate(parts), 24000, format="WAV")
     os.replace(temporary, destination)
     return destination
 
