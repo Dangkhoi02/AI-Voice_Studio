@@ -115,7 +115,7 @@ def generate_english_audio(
                     "expression": expression, "language_code": language_code,
                 }
                 try:
-                    process.stdin.write(json.dumps(request, ensure_ascii=False) + "\\n")
+                    process.stdin.write(json.dumps(request, ensure_ascii=False) + "\n")
                     process.stdin.flush()
                 except (BrokenPipeError, OSError) as error:
                     _stop_worker_locked()
