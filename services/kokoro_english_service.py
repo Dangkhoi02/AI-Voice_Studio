@@ -101,58 +101,61 @@ def generate_english_audio(
     temporary_path = save_path.with_name(save_path.name + ".part")
     temporary_path.unlink(missing_ok=True)
 
-    with _REQUEST_LOCK:
-        with _WORKER_LOCK:
-            _ensure_worker()
-            process = _WORKER
-            responses = _RESPONSE_QUEUE
-            _REQUEST_ID += 1
-            request_id = _REQUEST_ID
-            request = {
-                "id": request_id, "text": text, "voice": voice,
-                "speed": float(speed), "output": str(save_path),
-                "expression": expression, "language_code": language_code,
-            }
-            try:
-                process.stdin.write(json.dumps(request, ensure_ascii=False) + "\\n")
-                process.stdin.flush()
-            except (BrokenPipeError, OSError) as error:
-                _stop_worker_locked()
-                raise RuntimeError("Không thể gửi yêu cầu tới English worker.") from error
-
-        deadline = time.monotonic() + timeout
-        while True:
-            if cancel_event is not None and cancel_event.is_set():
-                with _WORKER_LOCK:
+    try:
+        with _REQUEST_LOCK:
+            with _WORKER_LOCK:
+                _ensure_worker()
+                process = _WORKER
+                responses = _RESPONSE_QUEUE
+                _REQUEST_ID += 1
+                request_id = _REQUEST_ID
+                request = {
+                    "id": request_id, "text": text, "voice": voice,
+                    "speed": float(speed), "output": str(save_path),
+                    "expression": expression, "language_code": language_code,
+                }
+                try:
+                    process.stdin.write(json.dumps(request, ensure_ascii=False) + "\\n")
+                    process.stdin.flush()
+                except (BrokenPipeError, OSError) as error:
                     _stop_worker_locked()
-                raise RuntimeError("Đã hủy tạo giọng nói.")
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                with _WORKER_LOCK:
-                    _stop_worker_locked()
-                raise TimeoutError(
-                    "Quá thời gian chờ tạo giọng tiếng Anh. Hãy kiểm tra mạng "
-                    "(lần đầu có thể cần tải model) rồi thử lại."
-                )
-            try:
-                response = responses.get(timeout=min(0.2, remaining))
-            except queue.Empty:
-                if process.poll() is not None:
+                    raise RuntimeError("Không thể gửi yêu cầu tới English worker.") from error
+    
+            deadline = time.monotonic() + timeout
+            while True:
+                if cancel_event is not None and cancel_event.is_set():
                     with _WORKER_LOCK:
                         _stop_worker_locked()
-                    raise RuntimeError("English worker đã dừng ngoài dự kiến.")
-                continue
-            if response.get("id") != request_id:
-                if response.get("error"):
+                    raise RuntimeError("Đã hủy tạo giọng nói.")
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
                     with _WORKER_LOCK:
                         _stop_worker_locked()
-                    raise RuntimeError(response["error"])
-                continue
-            if not response.get("ok"):
-                raise RuntimeError(response.get("error", "Không thể tạo giọng tiếng Anh."))
-            break
-
-    if not save_path.is_file():
-        raise RuntimeError("English worker kết thúc nhưng không tạo được tệp WAV.")
-    temporary_path.unlink(missing_ok=True)
-    return save_path
+                    raise TimeoutError(
+                        "Quá thời gian chờ tạo giọng tiếng Anh. Hãy kiểm tra mạng "
+                        "(lần đầu có thể cần tải model) rồi thử lại."
+                    )
+                try:
+                    response = responses.get(timeout=min(0.2, remaining))
+                except queue.Empty:
+                    if process.poll() is not None:
+                        with _WORKER_LOCK:
+                            _stop_worker_locked()
+                        raise RuntimeError("English worker đã dừng ngoài dự kiến.")
+                    continue
+                if response.get("id") != request_id:
+                    if response.get("error"):
+                        with _WORKER_LOCK:
+                            _stop_worker_locked()
+                        raise RuntimeError(response["error"])
+                    continue
+                if not response.get("ok"):
+                    raise RuntimeError(response.get("error", "Không thể tạo giọng tiếng Anh."))
+                break
+    
+        if not save_path.is_file():
+            raise RuntimeError("English worker kết thúc nhưng không tạo được tệp WAV.")
+        temporary_path.unlink(missing_ok=True)
+        return save_path
+    finally:
+        temporary_path.unlink(missing_ok=True)
