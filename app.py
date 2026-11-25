@@ -9,7 +9,8 @@ from pathlib import Path
 import pygame
 
 from services.logging_config import setup_logging
-from services.kokoro_english_service import ENGLISH_PYTHON, cancel_active_generation
+from services.kokoro_english_service import ENGLISH_PYTHON
+from services.tts_manager import cancel_active_generation
 from services.tts_manager import (
     generate_audio as create_audio,
     generate_preview_audio as create_preview_audio,
