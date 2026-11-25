@@ -37,8 +37,8 @@ class SpeechAnalyzerTests(unittest.TestCase):
 
     def test_abbreviations_and_numbered_lists_are_not_split_off(self):
         self.assertEqual(
-            split_text_segments("Tôi sống ở TP. Hồ Chí Minh."),
-            ["Tôi sống ở TP. Hồ Chí Minh."],
+            split_text_segments("Tôi sống ở TP. Hồ Chí Minh. Ông A. đến."),
+            ["Tôi sống ở TP. Hồ Chí Minh.", "Ông A. đến."],
         )
         self.assertEqual(
             split_text_segments("1. Mở đầu 2. Nội dung"),
