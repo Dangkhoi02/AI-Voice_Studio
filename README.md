@@ -14,7 +14,7 @@ The Vietnamese engine is installed from the repository submodule. The English Ko
 ## Clone the project
 
 ```bash
-git clone --recurse-submodules https://github.com/Dangkhoi02/AI-Voice_Studio.git
+git clone --branch develop --recurse-submodules https://github.com/Dangkhoi02/AI-Voice_Studio.git
 cd AI-Voice_Studio
 ```
 
