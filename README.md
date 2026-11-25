@@ -69,6 +69,10 @@ Speech Style currently adjusts the engine's supported speed preset. Expression c
 
 The application uses the upstream Kokoro-Vietnamese submodule. Review that project's current license and model terms before redistributing the application or its bundled model assets. Optional integrations are listed separately in `requirements-optional.txt`.
 
+## Test organization
+
+Automated regression tests live in `tests/` and run with `python -m unittest discover -s tests -v`. Older standalone test scripts at the repository root are retained for reference; they are not the canonical test runner.
+
 ## Legacy modules
 
 The current desktop application uses the local Kokoro engines in `services/kokoro_service.py` and `services/kokoro_english_service.py`. The older `services/tts_service.py` and `services/gemini_tts.py` files are not part of the active application flow. They are retained as legacy reference code for now; do not assume they are configured or production-ready.
