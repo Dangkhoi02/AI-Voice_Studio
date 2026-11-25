@@ -4,13 +4,15 @@ import os
 import re
 import sys
 import traceback
+import contextlib
 
 import numpy as np
 import soundfile as sf
-from kokoro_vietnamese import KokoroVietnamese, SAMPLE_RATE
-from services.speech_analyzer import split_text_segments
 
 _PROTOCOL_OUT = sys.stdout
+with contextlib.redirect_stdout(sys.stderr):
+    from kokoro_vietnamese import KokoroVietnamese, SAMPLE_RATE
+from services.speech_analyzer import split_text_segments
 _MODEL = None
 _VOICE = None
 _PAUSES = {
@@ -33,7 +35,8 @@ def _synthesize(request):
     )
     audio_parts = []
     for index, segment in enumerate(segments):
-        audio, _ = model.synthesize(segment, speed=float(request["speed"]))
+        with contextlib.redirect_stdout(sys.stderr):
+            audio, _ = model.synthesize(segment, speed=float(request["speed"]))
         audio_parts.append(np.asarray(audio, dtype=np.float32))
         if index < len(segments) - 1:
             ending = segment.rstrip()[-1:]
