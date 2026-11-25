@@ -13,9 +13,11 @@ _VI_ONLY = set(
     "ăắằẳẵặơớờởỡợưứừửựđạảẹẻẽịỉĩọỏụủũỳỵỷỹ"
     "ấầẩẫậếềểễệốồổộ"
 )
-_VI_COMMON_UNACCENTED = {
-    "xin", "chao", "toi", "la", "cac", "ban", "minh", "khong",
-    "nguoi", "viet", "nam", "cam", "on", "xin", "duoc", "mot",
+_VI_COMMON_WORDS = {
+    "xin", "chao", "chào", "toi", "tôi", "la", "là", "cac", "các",
+    "ban", "bạn", "minh", "mình", "khong", "không", "nguoi", "người",
+    "viet", "việt", "nam", "cam", "cảm", "on", "ơn", "duoc", "được",
+    "mot", "một", "xin", "này", "đây", "và", "của", "là", "những",
 }
 
 
@@ -37,7 +39,7 @@ def detect_language(text):
     if vi_ratio >= 0.02:
         return "vi"
     words = {word.strip(".,!?;:()[]{}\"'") for word in normalized.split()}
-    if len(words & _VI_COMMON_UNACCENTED) >= 2:
+    if len(words & _VI_COMMON_WORDS) >= 2:
         return "vi"
     return "en"
 
