@@ -8,9 +8,10 @@ import traceback
 
 import numpy as np
 import soundfile as sf
-from kokoro import KPipeline
 
 _PROTOCOL_OUT = sys.stdout
+with contextlib.redirect_stdout(sys.stderr):
+    from kokoro import KPipeline
 _PIPELINES = {}
 
 
