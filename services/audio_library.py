@@ -16,7 +16,7 @@ def sanitize_stem(name, max_len=100):
         raise ValueError("max_len must be a positive integer.")
     raw = str(name)
     # A path is a filename, not a request to select a nested directory.
-    stem = Path(raw).name
+    stem = raw
     stem = "".join("_" if (ord(char) < 32 or char in '<>:"/\\|?*') else char for char in stem)
     stem = stem.strip().rstrip(". ")
     if stem.lower().endswith(".wav"):
