@@ -184,13 +184,27 @@ def main():
         vi_ready = importlib.util.find_spec("kokoro_vietnamese") is not None
     except (ImportError, ValueError):
         vi_ready = False
-    en_ready = ENGLISH_PYTHON.is_file()
+    en_ready = False
+    if ENGLISH_PYTHON.is_file():
+        try:
+            import subprocess
+            subprocess.run(
+                [str(ENGLISH_PYTHON), "-c", "import kokoro"],
+                cwd=Path(__file__).resolve().parent,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=8,
+                check=True,
+            )
+            en_ready = True
+        except (OSError, subprocess.SubprocessError):
+            en_ready = False
     if vi_ready and en_ready:
-        engine_status.config(text="●  ENGINE SẴN SÀNG", fg=C["green"])
+        engine_status.config(text="●  ENGINE VI + EN SẴN SÀNG", fg=C["green"])
     elif vi_ready:
-        engine_status.config(text="●  THIẾU ENGINE EN", fg="#F5B942")
+        engine_status.config(text="●  THIẾU ENGINE TIẾNG ANH", fg="#F5B942")
     else:
-        engine_status.config(text="●  THIẾU ENGINE VI", fg="#F5B942")
+        engine_status.config(text="●  THIẾU ENGINE TIẾNG VIỆT", fg="#F5B942")
     
     # Tkinter Frame padx/pady options accept a single distance, not a tuple.
     content = tk.Frame(workspace, bg=C["bg"], padx=24, pady=22)
