@@ -6,6 +6,7 @@ from services.tts_manager import (
     create_unique_filename,
     detect_language,
     preview_excerpt,
+    generate_audio,
 )
 
 
@@ -32,6 +33,15 @@ class TTSManagerTests(unittest.TestCase):
             self.assertEqual(path.name, "_CON.wav")
             second = create_unique_filename("demo.wav", directory)
             self.assertEqual(second.name, "demo.wav")
+
+
+    def test_unsupported_language_is_rejected_before_style_lookup(self):
+        with self.assertRaisesRegex(ValueError, "Ngôn ngữ"):
+            generate_audio("hello", language="fr", style="not-a-style")
+
+    def test_voice_must_belong_to_selected_language(self):
+        with self.assertRaisesRegex(ValueError, "không khả dụng"):
+            generate_audio("Xin chào", language="vi", voice="af_heart")
 
     def test_preview_is_limited(self):
         excerpt = preview_excerpt("Xin chào. " + "nội dung " * 100)
